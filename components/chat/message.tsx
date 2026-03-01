@@ -14,7 +14,7 @@ const Message = ({ message }: Props) => {
         <div
           className={`p-3 text-sm whitespace-pre-wrap rounded-2xl bg-slate-300 ${
             isGemini &&
-            "order-first bg-linear-to-bl  from-sky-500 to-indigo-500"
+            "order-first bg-linear-to-bl   from-sky-500 to-indigo-500"
           }`}>
           <p>{message.content}</p>
           {isGemini && <CopyButton text={message.content} />}
