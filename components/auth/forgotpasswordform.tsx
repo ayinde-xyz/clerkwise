@@ -62,62 +62,61 @@ export function ForgotPasswordForm({
     });
   };
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card className="overflow-hidden">
-        <CardContent className=" p-0 ">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="p-6 md:p-8">
-              <div className="flex flex-col gap-6">
-                <div className="flex flex-col items-center text-center">
-                  <h1 className="text-2xl font-bold">Forgot your Password?</h1>
-                  <p className="text-balance text-muted-foreground">
-                    Send a reset email to your email address
-                  </p>
-                </div>
+    <div className={cn("flex flex-col gap-4", className)} {...props}>
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col items-center text-center">
+          <h1 className="text-2xl font-bold text-gray-900">
+            Forgot your Password?
+          </h1>
+          <p className="text-sm text-gray-600">
+            Send a reset email to your email address
+          </p>
+        </div>
 
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem className="grid gap-2">
-                      <FormLabel htmlFor="email">Email</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          id="email"
-                          type="email"
-                          placeholder="m@example.com"
-                          required
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full disabled:cursor-not-allowed">
-                  {loading && <Loader2 className="animate-spin" size={14} />}
-                  {loading ? "Sending..." : "Send Reset Email"}
-                </Button>
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex flex-col gap-4">
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem className="grid gap-2">
+                  <FormLabel htmlFor="email" className="text-gray-700">
+                    Email
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      id="email"
+                      type="email"
+                      placeholder="m@example.com"
+                      required
+                      className="border border-gray-200 bg-white/50 focus:bg-white transition-colors"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold disabled:cursor-not-allowed transition-all duration-300">
+              {loading && <Loader2 className="animate-spin" size={14} />}
+              {loading ? "Sending..." : "Send Reset Email"}
+            </Button>
 
-                <div className="text-center text-sm">
-                  Already have an account?{" "}
-                  <Link
-                    href="/auth/login"
-                    className="underline underline-offset-4">
-                    Log in
-                  </Link>
-                </div>
-              </div>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-      <div className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-primary">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
-        and <a href="#">Privacy Policy</a>.
+            <div className="text-center text-xs text-gray-600">
+              Already have an account?{" "}
+              <Link
+                href="/auth/login"
+                className="text-blue-600 hover:text-blue-700 underline underline-offset-4 transition-colors">
+                Log in
+              </Link>
+            </div>
+          </form>
+        </Form>
       </div>
     </div>
   );

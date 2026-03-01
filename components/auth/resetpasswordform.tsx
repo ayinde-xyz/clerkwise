@@ -64,72 +64,76 @@ export function ResetPasswordForm({
     });
   };
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card className="overflow-hidden">
-        <CardContent className=" p-0 ">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="p-6 md:p-8">
-              <div className="flex flex-col gap-6">
-                <div className="flex flex-col items-center text-center">
-                  <h1 className="text-2xl font-bold">Reset your Password</h1>
-                  <p className="text-balance text-muted-foreground">
-                    Please Enter your new password to continue
-                  </p>
-                </div>
+    <div className={cn("flex flex-col gap-4", className)} {...props}>
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col items-center text-center">
+          <h1 className="text-2xl font-bold text-gray-900">
+            Reset your Password
+          </h1>
+          <p className="text-sm text-gray-600">
+            Please enter your new password to continue
+          </p>
+        </div>
 
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem className="grid gap-2">
-                      <FormLabel htmlFor="password">Password</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          id="password"
-                          type="password"
-                          placeholder="Enter your new password"
-                          required
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="confirmPassword"
-                  render={({ field }) => (
-                    <FormItem className="grid gap-2">
-                      <FormLabel htmlFor="confirmPassword">Password</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          id="confirmPassword"
-                          type="password"
-                          placeholder="Confirm your password"
-                          required
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full disabled:cursor-not-allowed">
-                  {loading && <Loader2 className="animate-spin" size={14} />}
-                  {loading ? "Resetting..." : "Reset Password"}
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-      <div className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-primary">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
-        and <a href="#">Privacy Policy</a>.
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex flex-col gap-4">
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem className="grid gap-2">
+                  <FormLabel htmlFor="password" className="text-gray-700">
+                    Password
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      id="password"
+                      type="password"
+                      placeholder="Enter your new password"
+                      required
+                      className="border border-gray-200 bg-white/50 focus:bg-white transition-colors"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="confirmPassword"
+              render={({ field }) => (
+                <FormItem className="grid gap-2">
+                  <FormLabel
+                    htmlFor="confirmPassword"
+                    className="text-gray-700">
+                    Confirm Password
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      id="confirmPassword"
+                      type="password"
+                      placeholder="Confirm your password"
+                      required
+                      className="border border-gray-200 bg-white/50 focus:bg-white transition-colors"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold disabled:cursor-not-allowed transition-all duration-300">
+              {loading && <Loader2 className="animate-spin" size={14} />}
+              {loading ? "Resetting..." : "Reset Password"}
+            </Button>
+          </form>
+        </Form>
       </div>
     </div>
   );
