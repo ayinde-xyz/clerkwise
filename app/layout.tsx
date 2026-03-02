@@ -1,11 +1,6 @@
 import type { Metadata } from "next";
-import { Comfortaa, Roboto } from "next/font/google";
+import { Roboto } from "next/font/google";
 import "./globals.css";
-import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
-import { headers } from "next/headers";
-
-const comfortaa = Comfortaa({ subsets: ["latin"] });
 const robota = Roboto({ style: "normal", weight: "400" });
 
 export const metadata: Metadata = {

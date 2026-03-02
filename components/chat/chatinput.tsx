@@ -150,11 +150,12 @@ const ChatInput = ({ chatId }: Props) => {
           control={form.control}
           name="file"
           render={({ field }) => (
-            <Field className="rounded-full space-y-0 absolute bottom-1 right-10 w-4 h-fit">
+            <Field className="rounded-full space-y-0 absolute bottom-1 right-10 w-9 h-fit">
               <Button
                 variant={"ghost"}
                 size={"icon"}
                 type="button"
+                className="focus:outline-gray-400 focus:outline-2 focus:rounded-full  hover:bg-gray-200 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={form.watch("model") === "gemini-2.5-flash-lite"}>
                 <PaperclipIcon size={14} />
@@ -179,12 +180,13 @@ const ChatInput = ({ chatId }: Props) => {
             </Field>
           )}
         />
+
         <Button
           type="submit"
           variant={"ghost"}
           size={"icon"}
           disabled={loading}
-          className="hover:opacity-50 font-bold p-1.5 absolute bottom-1 right-0  rounded disabled:bg-gray-300 disabled:cursor-not-allowed">
+          className="hover:opacity-50 font-bold p-1.5 absolute bottom-1 right-0  rounded-full disabled:bg-gray-300 disabled:cursor-not-allowed">
           <SendIcon size={14} />
         </Button>
       </FieldGroup>
