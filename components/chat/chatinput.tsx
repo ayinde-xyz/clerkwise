@@ -175,6 +175,7 @@ const ChatInput = ({ chatId }: Props) => {
                       const uploadedResult = await handleUpload(
                         e.target.files[0],
                       );
+                      console.log(uploadedResult);
                       field.onChange(uploadedResult);
                     }
                   }}

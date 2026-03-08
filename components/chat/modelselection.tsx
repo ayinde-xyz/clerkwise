@@ -39,8 +39,8 @@ const models = [
     description: "The best model in the world for multimodal understanding",
   },
   {
-    title: "Gemini 3 Flash",
-    value: "gemini-3-flash-preview",
+    title: "Gemini 3.1 Flash",
+    value: "gemini-3.1-flash-lite-preview",
     description:
       "Our most balanced model built for speed, scale, and frontier intelligence.",
   },
