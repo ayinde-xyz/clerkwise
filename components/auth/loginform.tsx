@@ -26,7 +26,6 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const [loading, startLoading] = useTransition();
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
@@ -115,10 +114,10 @@ export function LoginForm({
             />
             <Button
               type="submit"
-              disabled={loading}
+              disabled={isPending}
               className="w-full bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold disabled:cursor-not-allowed transition-all duration-300">
-              {loading && <Loader2 className="animate-spin" size={14} />}
-              {loading ? "Logging in..." : "Log in"}
+              {isPending && <Loader2 className="animate-spin" size={14} />}
+              {isPending ? "Logging in..." : "Log in"}
             </Button>
           </form>
         </Form>

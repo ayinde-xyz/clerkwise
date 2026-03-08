@@ -32,7 +32,6 @@ type Props = {
 const ChatInput = ({ chatId }: Props) => {
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const router = useRouter();
   const store = useModel();
 
   const form = useForm<ChatSchemaType>({
@@ -77,13 +76,22 @@ const ChatInput = ({ chatId }: Props) => {
 
       form.reset();
 
-      await axios.post("/api/chat/addMessage", {
+      const addMessageres = await axios.post("/api/chat/addMessage", {
         chatId,
         prompt,
         role: "user",
       });
 
-      const response = await aiResponse(prompt, model);
+      if (addMessageres.status !== 200) {
+        toast.dismiss();
+        toast.error("Failed to send message");
+        setLoading(false);
+        return;
+      }
+      toast.dismiss();
+      toast.loading("Generating response...");
+
+      const response = await aiResponse(prompt, model, file?.uri);
 
       await axios.post("/api/chat/addMessage", {
         chatId,

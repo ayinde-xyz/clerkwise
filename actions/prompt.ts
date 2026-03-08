@@ -4,7 +4,8 @@ import { FileMetadataResponse } from "@google/generative-ai/server";
 import { revalidatePath } from "next/cache";
 import { ModelType } from "@/schemas";
 import * as z from "zod";
-import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import { ChatGoogle } from "@langchain/google/node";
+import { HumanMessage } from "@langchain/core/messages";
 
 // const ai = genkit({
 //   plugins: [googleAI()],
@@ -14,25 +15,48 @@ export const aiResponse = async (
   input: string,
   // session?: Session,
   model: string,
+  file?: string,
   // model?: ModelType,
   // response?: FileMetadataResponse | undefined,
 ) => {
-  const modelRes = new ChatGoogleGenerativeAI({
-    model,
-    maxOutputTokens: 2048,
-  });
+  try {
+    const modelRes = new ChatGoogle({
+      model,
+      maxOutputTokens: 2048,
+    });
 
-  const response = await modelRes.invoke([["human", input]]);
+    if (file) {
+      await await modelRes.invoke([
+        new HumanMessage({
+          contentBlocks: [
+            {
+              type: "text",
+              text: input,
+            },
+            {
+              type: "file",
+              mimeType: "application/pdf",
+              data: file,
+            },
+          ],
+        }),
+      ]);
+    }
 
-  console.log("AI Response:", response.content);
+    const response = await modelRes.invoke([["human", input]]);
 
-  // const baseUrl =
-  //   process.env.NEXT_PUBLIC_BASE_URL ||
-  //   process.env.NEXTAUTH_URL ||
-  //   `http://localhost:${process.env.PORT || 3000}`;
+    console.log("AI Response:", response.content);
 
-  // revalidatePath(`/api/chats/${chatId}`);
-  return response.content;
+    // const baseUrl =
+    //   process.env.NEXT_PUBLIC_BASE_URL ||
+    //   process.env.NEXTAUTH_URL ||
+    //   `http://localhost:${process.env.PORT || 3000}`;
+
+    // revalidatePath(`/api/chats/${chatId}`);
+    return response.content;
+  } catch (error) {
+    console.error("Error generating AI response:", error);
+  }
 };
 
 // const messageHistory: MessageHistory[] = [];

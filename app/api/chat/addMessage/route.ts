@@ -44,7 +44,10 @@ export async function POST(request: NextRequest) {
     //  console.log(response);
 
     revalidatePath("/api/chat/fetchMessages?chatId=" + chatId);
-    return NextResponse.json("Message sent successfully", { status: 200 });
+    return NextResponse.json(
+      { success: "Message sent successfully" },
+      { status: 200 },
+    );
   } catch (error) {
     return NextResponse.json({ error: "Message not sent successfully" });
   }

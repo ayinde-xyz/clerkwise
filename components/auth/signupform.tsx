@@ -21,8 +21,6 @@ import { signupEmailAction } from "@/actions/signup";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
-
 export function SignupForm({
   className,
   ...props
