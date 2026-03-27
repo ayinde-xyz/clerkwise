@@ -15,7 +15,7 @@ export const aiResponse = async (
   input: string,
   // session?: Session,
   model: string,
-  file?: string,
+  file?: { uri: string; mimeType: string },
   // model?: ModelType,
   // response?: FileMetadataResponse | undefined,
 ) => {
@@ -25,25 +25,26 @@ export const aiResponse = async (
       maxOutputTokens: 2048,
     });
 
+    const messageContent: any[] = [
+      {
+        type: "text",
+        text: input,
+      },
+    ];
+
     if (file) {
-      await await modelRes.invoke([
-        new HumanMessage({
-          contentBlocks: [
-            {
-              type: "text",
-              text: input,
-            },
-            {
-              type: "file",
-              mimeType: "application/pdf",
-              data: file,
-            },
-          ],
-        }),
-      ]);
+      messageContent.push({
+        type: "media",
+        mimeType: file.mimeType,
+        fileUri: file.uri,
+      });
     }
 
-    const response = await modelRes.invoke([["human", input]]);
+    const response = await modelRes.invoke([
+      new HumanMessage({
+        content: messageContent,
+      }),
+    ]);
 
     console.log("AI Response:", response.content);
 

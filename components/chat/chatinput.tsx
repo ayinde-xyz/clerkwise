@@ -14,7 +14,6 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PaperclipIcon, SendIcon } from "lucide-react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import axios from "axios";
 import { Field, FieldGroup, FieldSet } from "../ui/field";
 import {
@@ -25,6 +24,7 @@ import {
 } from "../ui/input-group";
 import ModelSelection from "./modelselection";
 import useModel from "@/hooks/use-model";
+import { useRouter } from "next/navigation";
 
 type Props = {
   chatId: string;
@@ -33,6 +33,7 @@ const ChatInput = ({ chatId }: Props) => {
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const store = useModel();
+  const router = useRouter();
 
   const form = useForm<ChatSchemaType>({
     resolver: zodResolver(ChatSchema),
@@ -74,13 +75,13 @@ const ChatInput = ({ chatId }: Props) => {
 
       const { prompt, model, file } = values;
 
-      form.reset();
-
       const addMessageres = await axios.post("/api/chat/addMessage", {
         chatId,
         prompt,
         role: "user",
       });
+
+      router.refresh();
 
       if (addMessageres.status !== 200) {
         toast.dismiss();
@@ -91,13 +92,19 @@ const ChatInput = ({ chatId }: Props) => {
       toast.dismiss();
       toast.loading("Generating response...");
 
-      const response = await aiResponse(prompt, model, file?.uri);
+      const fileData = file
+        ? { uri: file.uri, mimeType: file.mimeType }
+        : undefined;
+      const response = await aiResponse(prompt, model, fileData);
 
       await axios.post("/api/chat/addMessage", {
         chatId,
         prompt: response,
         role: "model",
       });
+      toast.dismiss();
+      toast.success("Generated Response");
+      router.refresh();
     } catch (error) {
       console.error(error);
       toast.error(`${error} Failed to send message`);

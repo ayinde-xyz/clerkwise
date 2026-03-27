@@ -2,7 +2,7 @@ import { db } from "@/drizzle";
 import { chat, message } from "@/drizzle/schema";
 import { auth } from "@/lib/auth";
 import { eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -42,8 +42,8 @@ export async function POST(request: NextRequest) {
       });
 
     //  console.log(response);
-
-    revalidatePath("/api/chat/fetchMessages?chatId=" + chatId);
+    revalidatePath(`/chat/${chatId}`);
+    updateTag(`messages-${chatId}`);
     return NextResponse.json(
       { success: "Message sent successfully" },
       { status: 200 },

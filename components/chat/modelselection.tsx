@@ -81,7 +81,7 @@ const ModelSelection = ({ field, fieldState, isSidebar }: Model) => {
           name={field?.name}
           value={value}
           onValueChange={onChange}
-          defaultValue="gemini-3-flash-preview">
+          defaultValue="gemini-3.1-flash-lite-preview">
           <SelectTrigger
             aria-invalid={fieldState?.invalid}
             className="min-w-30">
@@ -89,12 +89,10 @@ const ModelSelection = ({ field, fieldState, isSidebar }: Model) => {
           </SelectTrigger>
           <SelectContent position="item-aligned">
             {models.map((model) => (
-              <>
-                <SelectItem key={model.value} value={model.value}>
-                  {model.title}
-                </SelectItem>
+              <SelectItem key={model.value} value={model.value}>
+                {model.title}
                 <SelectSeparator />
-              </>
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -115,7 +113,7 @@ const ModelSelection = ({ field, fieldState, isSidebar }: Model) => {
           name={field?.name}
           value={value}
           onValueChange={onChange}
-          defaultValue={"gemini-3-flash-preview"}>
+          defaultValue={"gemini-3.1-flash-lite-preview"}>
           {models.map((model) => (
             <FieldLabel key={model.value}>
               <Field
