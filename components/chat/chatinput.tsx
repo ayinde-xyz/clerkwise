@@ -75,13 +75,13 @@ const ChatInput = ({ chatId }: Props) => {
 
       const { prompt, model, file } = values;
 
+      form.reset({ ...values, prompt: "" });
+
       const addMessageres = await axios.post("/api/chat/addMessage", {
         chatId,
         prompt,
         role: "user",
       });
-
-      router.refresh();
 
       if (addMessageres.status !== 200) {
         toast.dismiss();
