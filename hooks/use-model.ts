@@ -10,7 +10,7 @@ type ModelState = {
   reset: () => void;
 };
 
-const DEFAULT_MODEL = "gemini-3-flash-preview";
+const DEFAULT_MODEL = "gemini-3.1-flash-lite-preview";
 
 const useModel = create<ModelState>()(
   persist(
