@@ -103,7 +103,7 @@ const ChatInput = ({ chatId }: Props) => {
         role: "model",
       });
       toast.dismiss();
-      toast.success("Generated Response");
+      toast.success("Response Generated Successfully");
       router.refresh();
     } catch (error) {
       console.error(error);
