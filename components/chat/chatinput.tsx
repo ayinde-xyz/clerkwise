@@ -151,7 +151,7 @@ const ChatInput = ({ chatId }: Props) => {
               store.setModel(v);
             };
             return (
-              <FieldSet className="absolute bottom-1 right-18 w-6 rounded-b-lg">
+              <FieldSet className="absolute bottom-1 right-18 w-7 rounded-b-lg">
                 <ModelSelection
                   field={{ ...field, onChange: handleChange }}
                   fieldState={fieldState}
