@@ -1,29 +1,22 @@
 "use server";
-import { Session } from "@/lib/auth-client";
-import { FileMetadataResponse } from "@google/generative-ai/server";
-import { revalidatePath } from "next/cache";
-import { ModelType } from "@/schemas";
-import * as z from "zod";
-import { ChatGoogle } from "@langchain/google/node";
+// import { Session } from "@/lib/auth-client";
+// import { FileMetadataResponse } from "@google/generative-ai/server";
+// import { revalidatePath } from "next/cache";
+// import { ModelType } from "@/schemas";
+// import * as z from "zod";
+import { ChatGoogle } from "@langchain/google";
 import { HumanMessage } from "@langchain/core/messages";
-
-// const ai = genkit({
-//   plugins: [googleAI()],
-// });
 
 export const aiResponse = async (
   input: string,
   // session?: Session,
   model: string,
-  file?: { uri: string; mimeType: string },
+  // file?: { uri: string; mimeType: string },
   // model?: ModelType,
   // response?: FileMetadataResponse | undefined,
 ) => {
   try {
-    const modelRes = new ChatGoogle({
-      model,
-      maxOutputTokens: 2048,
-    });
+    console.log(input, model, "this is the input and model");
 
     const messageContent: any[] = [
       {
@@ -32,13 +25,22 @@ export const aiResponse = async (
       },
     ];
 
-    if (file) {
-      messageContent.push({
-        type: "media",
-        mimeType: file.mimeType,
-        fileUri: file.uri,
-      });
-    }
+    // if (file) {
+    //   messageContent.push({
+    //     type: "media",
+    //     mimeType: file.mimeType,
+    //     fileUri: file.uri,
+    //   });
+    // }
+    const modelRes = new ChatGoogle({
+      apiKey: process.env.GOOGLE_API_KEY,
+      model,
+      maxOutputTokens: 2048,
+      temperature: 1,
+      thinkingBudget: 1024,
+    });
+
+    console.log(model);
 
     const response = await modelRes.invoke([
       new HumanMessage({
@@ -46,12 +48,12 @@ export const aiResponse = async (
       }),
     ]);
 
-    console.log("AI Response:", response.content);
+    console.log("AI Response:", response);
 
-    // const baseUrl =
-    //   process.env.NEXT_PUBLIC_BASE_URL ||
-    //   process.env.NEXTAUTH_URL ||
-    //   `http://localhost:${process.env.PORT || 3000}`;
+    const baseUrl =
+      process.env.NEXT_PUBLIC_BASE_URL ||
+      process.env.NEXTAUTH_URL ||
+      `http://localhost:${process.env.PORT || 3000}`;
 
     // revalidatePath(`/api/chats/${chatId}`);
     return response.content;

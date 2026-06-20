@@ -12,7 +12,7 @@ import { aiResponse } from "@/actions/prompt";
 import { uploadFile } from "@/actions/upload";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { PaperclipIcon, SendIcon } from "lucide-react";
+import { PaperclipIcon, SendIcon, XIcon, FileIcon } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
 import { Field, FieldGroup, FieldSet } from "../ui/field";
@@ -31,6 +31,7 @@ type Props = {
 };
 const ChatInput = ({ chatId }: Props) => {
   const [loading, setLoading] = useState(false);
+  const [attachedFileName, setAttachedFileName] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const store = useModel();
   const router = useRouter();
@@ -67,6 +68,14 @@ const ChatInput = ({ chatId }: Props) => {
     return response;
   };
 
+  const removeFile = () => {
+    form.setValue("file", undefined);
+    setAttachedFileName(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   const sendMessage = async (values: ChatSchemaType) => {
     try {
       setLoading(true);
@@ -76,35 +85,40 @@ const ChatInput = ({ chatId }: Props) => {
       const { prompt, model, file } = values;
 
       form.reset({ ...values, prompt: "" });
+      setAttachedFileName(null);
 
-      const addMessageres = await axios.post("/api/chat/addMessage", {
+      const addMessages = await axios.post("/api/chat/addMessage", {
         chatId,
         prompt,
         role: "user",
       });
 
-      if (addMessageres.status !== 200) {
+      if (addMessages.status !== 200) {
         toast.dismiss();
         toast.error("Failed to send message");
         setLoading(false);
         return;
       }
       toast.dismiss();
-      toast.loading("Generating response...");
 
-      const fileData = file
-        ? { uri: file.uri, mimeType: file.mimeType }
-        : undefined;
-      const response = await aiResponse(prompt, model, fileData);
+      // const fileData =
+      //   file?.uri && file?.mimeType
+      //     ? { uri: file.uri, mimeType: file.mimeType }
+      //     : undefined;
 
-      await axios.post("/api/chat/addMessage", {
-        chatId,
-        prompt: response,
-        role: "model",
-      });
+      const response = await aiResponse(prompt, model);
+
+      // await axios.post("/api/chat/addMessage", {
+      //   chatId,
+      //   prompt: response,
+      //   role: "model",
+      // });
+
       toast.dismiss();
       toast.success("Response Generated.");
+
       router.refresh();
+      return response;
     } catch (error) {
       console.error(error);
       toast.error(`${error} Failed to send message`);
@@ -119,6 +133,23 @@ const ChatInput = ({ chatId }: Props) => {
       className="relative bg-transparent w-full max-w-2xl mx-auto  rounded-2xl  text-sm">
       <div className="absolute -top-15 inset-x-0 h-15 bg-linear-to-t from-white via-white/50 to-transparent pointer-events-none blur-sm" />
       <FieldGroup>
+        {/* File attachment chip */}
+        {attachedFileName && (
+          <div className="absolute -top-9 left-1 z-10">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 border border-slate-200 rounded-lg text-xs text-slate-600 shadow-sm">
+              <FileIcon size={12} className="text-slate-400 shrink-0" />
+              <span className="max-w-[180px] truncate">{attachedFileName}</span>
+              <button
+                type="button"
+                onClick={removeFile}
+                className="ml-0.5 p-0.5 rounded-full hover:bg-slate-200 transition-colors text-slate-400 hover:text-slate-600"
+                aria-label="Remove file">
+                <XIcon size={12} />
+              </button>
+            </div>
+          </div>
+        )}
+
         <Controller
           control={form.control}
           name="prompt"
@@ -179,11 +210,13 @@ const ChatInput = ({ chatId }: Props) => {
                   ref={fileInputRef}
                   onChange={async (e) => {
                     if (e.target.files && e.target.files[0]) {
-                      const uploadedResult = await handleUpload(
-                        e.target.files[0],
-                      );
+                      const selectedFile = e.target.files[0];
+                      const uploadedResult = await handleUpload(selectedFile);
                       console.log(uploadedResult);
                       field.onChange(uploadedResult);
+                      if (uploadedResult?.state === "ACTIVE") {
+                        setAttachedFileName(selectedFile.name);
+                      }
                     }
                   }}
                   disabled={

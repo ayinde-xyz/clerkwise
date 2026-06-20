@@ -1,10 +1,10 @@
 "use server";
-import { GoogleAIFileManager } from "@google/generative-ai/server";
-import { writeFileSync } from "fs";
+import { writeFileSync, unlinkSync } from "fs";
 import { tmpdir } from "os";
 import { join } from "path";
+import { GoogleGenAI } from "@google/genai";
 
-const fileManager = new GoogleAIFileManager(process.env.GOOGLE_GENAI_API_KEY!);
+const ai = new GoogleGenAI({});
 
 export const uploadFile = async (file: File) => {
   const fileBuffer = await file.arrayBuffer();
@@ -13,9 +13,23 @@ export const uploadFile = async (file: File) => {
 
   const tempFilePath = join(tmpdir(), file.name);
   writeFileSync(tempFilePath, unit8Array);
-  const uploadResult = await fileManager.uploadFile(tempFilePath, {
-    mimeType: file.type,
-    displayName: file.name,
-  });
-  return uploadResult.file;
+
+  try {
+    const uploadedFile = await ai.files.upload({
+      file: tempFilePath,
+      config: {
+        mimeType: file.type,
+        displayName: file.name,
+      },
+    });
+
+    return uploadedFile;
+  } finally {
+    // Clean up temp file
+    try {
+      unlinkSync(tempFilePath);
+    } catch {
+      // ignore cleanup errors
+    }
+  }
 };

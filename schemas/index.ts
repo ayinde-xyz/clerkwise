@@ -1,5 +1,5 @@
 import * as z from "zod";
-import { FileMetadataResponse } from "@google/generative-ai/server";
+import type { File as GenAIFile } from "@google/genai";
 
 export const LoginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email" }),
@@ -35,7 +35,7 @@ export const ChatSchema = z.object({
   // chatId: z.string().min(1, { message: "Please enter a valid chat ID" }),
   // model: z.string().min(1, { message: "Please enter a valid model" }),
   file: z
-    .custom<FileMetadataResponse>()
+    .custom<GenAIFile>()
     .refine((files) => files && Number(files.sizeBytes) < 7000000, {
       message: "Your file must be less than 7MB",
     })
