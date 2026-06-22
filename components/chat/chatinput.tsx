@@ -101,18 +101,13 @@ const ChatInput = ({ chatId }: Props) => {
       }
       toast.dismiss();
 
-      // const fileData =
-      //   file?.uri && file?.mimeType
-      //     ? { uri: file.uri, mimeType: file.mimeType }
-      //     : undefined;
-
-      const response = await aiResponse(prompt, model);
-
-      // await axios.post("/api/chat/addMessage", {
-      //   chatId,
-      //   prompt: response,
-      //   role: "model",
-      // });
+      const response = await fetch("/api/prompt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt,
+        }),
+      });
 
       toast.dismiss();
       toast.success("Response Generated.");

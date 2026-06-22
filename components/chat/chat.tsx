@@ -8,8 +8,6 @@ type Props = {
   chatId?: string;
 };
 
-// const fetcher = (url: string) => axios.get(url).then((res) => res.data);
-
 const Chat = async ({ chatId }: Props) => {
   if (!chatId)
     return (
@@ -18,15 +16,6 @@ const Chat = async ({ chatId }: Props) => {
         <EmptyChat message={"Create a new chat to get started!"} />
       </div>
     );
-
-  // const {
-  //   data: messages,
-  //   error,
-  //   isLoading,
-  // } = useSWR<MessageType[]>(
-  //   `/api/chat/fetchMessages?chatId=${chatId}`,
-  //   fetcher,
-  // );
 
   const messages = await getMessagesByChatId(chatId);
 
