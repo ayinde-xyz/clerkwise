@@ -101,7 +101,7 @@ const ChatInput = ({ chatId }: Props) => {
       }
       toast.dismiss();
 
-      const response = await fetch("/api/prompt", {
+      const response = await fetch("/api/chat/prompt", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
