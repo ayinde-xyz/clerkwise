@@ -1,28 +1,22 @@
-import { notFound } from "next/navigation";
+"use client";
+import { notFound, useSearchParams } from "next/navigation";
 import Chat from "./chat";
 import ChatInput from "./chatinput";
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
+import { useSession } from "@/lib/auth-client";
 
-type Props = {
-  params: Promise<{
-    id: string;
-  }>;
-};
+const ChatInterface = () => {
+  const session = useSession();
+  const params = useSearchParams();
+  console.log("params", params);
+  const chatId = params.get("id") || "";
 
-const ChatInterface = async ({ params }: Props) => {
-  const { id } = await params;
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session || !session.user) {
+  if (!session || !session.data?.user) {
     return notFound();
   }
   return (
     <>
-      <Chat chatId={id} />
-      <ChatInput chatId={id} />
+      <Chat chatId={chatId} />
+      <ChatInput chatId={chatId} />
     </>
   );
 };

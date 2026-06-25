@@ -1,8 +1,5 @@
 "use client";
 import { PlusIcon } from "@heroicons/react/24/solid";
-import { redirect } from "next/navigation";
-import { db } from "@/drizzle";
-import { chat } from "@/drizzle/schema";
 import { Button } from "../ui/button";
 import { useSession } from "@/lib/auth-client";
 

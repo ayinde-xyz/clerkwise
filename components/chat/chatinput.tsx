@@ -27,7 +27,7 @@ import useModel from "@/hooks/use-model";
 import { useRouter } from "next/navigation";
 
 type Props = {
-  chatId: string;
+  chatId?: string;
 };
 const ChatInput = ({ chatId }: Props) => {
   const [loading, setLoading] = useState(false);

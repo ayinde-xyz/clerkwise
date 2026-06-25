@@ -22,7 +22,7 @@ const ChatRow = ({ chat, error }: Props) => {
   };
   return (
     <Link
-      href={`/chat/${chat.id}`}
+      href={`/chat?id=${chat.id}`}
       className={`chatRow justify-center ${active ? "bg-gray-700/50" : "bg-transparent"}`}>
       <ChatBubbleLeftIcon className="h-5 w-5" />
       {error && (

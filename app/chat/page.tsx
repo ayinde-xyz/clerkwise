@@ -2,20 +2,25 @@ import { auth } from "@/lib/auth";
 import Chat from "@/components/chat/chat";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
+import ChatInterface from "@/components/chat/chatinterface";
 
 const ChatPage = async () => {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
 
+  // const params = searchParams ? await searchParams : undefined;
+  // const { id } = params || {};
+
   if (!session || !session.user) {
     return notFound();
   }
-  // console.log(session);
+
   return (
     <div className="flex flex-col overflow-hidden w-full h-screen">
+      {/* <p>Yes i am still there</p> */}
       {/* Chat */}
-      <Chat />
+      <ChatInterface />
     </div>
   );
 };
