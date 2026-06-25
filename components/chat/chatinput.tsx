@@ -133,7 +133,7 @@ const ChatInput = ({ chatId }: Props) => {
           <div className="absolute -top-9 left-1 z-10">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 border border-slate-200 rounded-lg text-xs text-slate-600 shadow-sm">
               <FileIcon size={12} className="text-slate-400 shrink-0" />
-              <span className="max-w-[180px] truncate">{attachedFileName}</span>
+              <span className="max-w-45 truncate">{attachedFileName}</span>
               <button
                 type="button"
                 onClick={removeFile}

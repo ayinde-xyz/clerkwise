@@ -20,20 +20,23 @@ import { Skeleton } from "../ui/skeleton";
 import ModelSelection from "./modelselection";
 import { useSession } from "@/lib/auth-client";
 import { SignOut } from "../auth/signout";
+import { newChat } from "@/actions/newchat";
 
 const fetcher = (url: string) => axios.get(url).then((res) => res.data);
 const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
-  const createNewChat = async () => {
-    const newChatId = await axios.get("/api/chat/createNewChat");
-    redirect(`/chat/${newChatId.data.id}`);
-  };
   const session = useSession();
+
+  const createNewChat = async () => {
+    if (!session.data) return;
+    const newChatId = await newChat(session.data);
+    redirect(`/chat/${newChatId}`);
+  };
 
   const {
     data: chats,
     error,
     isLoading,
-  } = useSWR<Chat[]>("/api/chat/fetchChats", fetcher);
+  } = useSWR<Chat[]>("/api/chat", fetcher);
 
   return (
     <Sidebar {...props} variant="floating">
@@ -67,7 +70,7 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
                 {chats?.map((chat) => (
                   <SidebarMenu key={chat.id}>
                     <SidebarMenuButton asChild>
-                      <ChatRow chat={chat} />
+                      <ChatRow chat={chat} error={error} />
                     </SidebarMenuButton>
                   </SidebarMenu>
                 ))}
@@ -78,7 +81,7 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu className="items-center justify-center">
-          {session && <SignOut />}
+          {session.data && <SignOut />}
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
