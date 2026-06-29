@@ -17,12 +17,12 @@ const ChatRow = ({ chat, error }: Props) => {
   const active = pathname.includes(chat.id);
 
   const removeChat = async (chatId: string) => {
-    await axios.delete(`/api/chat?chatId=${chatId}`);
+    await axios.delete(`/api/chat/${chatId}`);
     router.push("/chat");
   };
   return (
     <Link
-      href={`/chat?id=${chat.id}`}
+      href={`/chat/${chat.id}`}
       className={`chatRow justify-center ${active ? "bg-gray-700/50" : "bg-transparent"}`}>
       <ChatBubbleLeftIcon className="h-5 w-5" />
       {error && (

@@ -1,21 +1,28 @@
 "use client";
-import { notFound, useSearchParams } from "next/navigation";
 import Chat from "./chat";
 import ChatInput from "./chatinput";
-import { useSession } from "@/lib/auth-client";
+import { useEffect, useState } from "react";
+import { Message } from "@/drizzle/schema";
 
-const ChatInterface = () => {
-  const session = useSession();
-  const params = useSearchParams();
-  console.log("params", params);
-  const chatId = params.get("id") || "";
+type ChatInterfaceProps = {
+  initialMessages: Message[];
+  chatId: string;
+};
 
-  if (!session || !session.data?.user) {
-    return notFound();
-  }
+const ChatInterface = ({ initialMessages, chatId }: ChatInterfaceProps) => {
+  const [messages, setMessages] = useState<Message[]>(initialMessages);
+
+  // const appendMessage = (message: Message[]) => {
+  //   setMessages((prevMessages) => [...prevMessages, ...message]);
+  // };
+
+  // useEffect(() => {
+  //   appendMessage(initialMessages);
+  // }, []);
+
   return (
     <>
-      <Chat chatId={chatId} />
+      <Chat chatId={chatId} messages={messages} />
       <ChatInput chatId={chatId} />
     </>
   );
