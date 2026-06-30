@@ -1,20 +1,14 @@
 "use client";
 import { useRef, useState } from "react";
-import {
-  ChatSchema,
-  ChatSchemaType,
-  FileSchema,
-  FileSchemaType,
-} from "@/schemas";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { aiResponse } from "@/actions/prompt";
 import { uploadFile } from "@/actions/upload";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, UseFormReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PaperclipIcon, SendIcon, XIcon, FileIcon } from "lucide-react";
 import { toast } from "sonner";
-import axios from "axios";
 import { Field, FieldGroup, FieldSet } from "../ui/field";
 import {
   InputGroup,
@@ -25,48 +19,17 @@ import {
 import ModelSelection from "./modelselection";
 import useModel from "@/hooks/use-model";
 import { useRouter } from "next/navigation";
+import { ChatSchemaType } from "@/schemas";
 
 type Props = {
-  chatId: string;
+  chatId?: string;
+  form: UseFormReturn<ChatSchemaType>;
+  sendMessage: (values: ChatSchemaType) => Promise<Response | undefined>;
+  loading: boolean;
 };
-const ChatInput = ({ chatId }: Props) => {
-  const [loading, setLoading] = useState(false);
+const ChatInput = ({ chatId, form, sendMessage, loading }: Props) => {
   const [attachedFileName, setAttachedFileName] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const store = useModel();
-  const router = useRouter();
-
-  const form = useForm<ChatSchemaType>({
-    resolver: zodResolver(ChatSchema),
-    defaultValues: {
-      prompt: "",
-      model: store.model,
-      file: undefined,
-    },
-  });
-
-  // Keep form model in sync when store changes (e.g., sidebar selection)
-
-  const handleUpload = async (file: FileSchemaType) => {
-    setLoading(true);
-    const validatedFile = FileSchema.safeParse(file);
-    if (validatedFile.error) {
-      console.error(validatedFile.error.message);
-      toast.error("Please ensure your file is less than 6MB");
-      return null;
-    }
-    toast.loading("Uploading file...");
-
-    const response = file ? await uploadFile(file) : undefined;
-    if (response?.state === "ACTIVE") {
-      toast.dismiss();
-      toast.success("File uploaded successfully");
-    } else {
-      toast.error("Failed to upload file");
-    }
-    setLoading(false);
-    return response;
-  };
 
   const removeFile = () => {
     form.setValue("file", undefined);
@@ -76,56 +39,36 @@ const ChatInput = ({ chatId }: Props) => {
     }
   };
 
-  const sendMessage = async (values: ChatSchemaType) => {
-    try {
-      setLoading(true);
+  // Keep form model in sync when store changes (e.g., sidebar selection)
 
-      toast.loading("Sending message...");
+  // const handleUpload = async (file: FileSchemaType) => {
+  //   setLoading(true);
+  //   const validatedFile = FileSchema.safeParse(file);
+  //   if (validatedFile.error) {
+  //     console.error(validatedFile.error.message);
+  //     toast.error("Please ensure your file is less than 6MB");
+  //     return null;
+  //   }
+  //   toast.loading("Uploading file...");
 
-      const { prompt, model, file } = values;
+  //   const response = file ? await uploadFile(file) : undefined;
+  //   if (response?.state === "ACTIVE") {
+  //     toast.dismiss();
+  //     toast.success("File uploaded successfully");
+  //   } else {
+  //     toast.error("Failed to upload file");
+  //   }
+  //   setLoading(false);
+  //   return response;
+  // };
 
-      form.reset({ ...values, prompt: "" });
-      setAttachedFileName(null);
-
-      const addMessages = await axios.post("/api/chat/addMessage", {
-        chatId,
-        prompt,
-        role: "user",
-      });
-
-      if (addMessages.status !== 200) {
-        toast.dismiss();
-        toast.error("Failed to send message");
-        setLoading(false);
-        return;
-      }
-      toast.dismiss();
-
-      // const fileData =
-      //   file?.uri && file?.mimeType
-      //     ? { uri: file.uri, mimeType: file.mimeType }
-      //     : undefined;
-
-      const response = await aiResponse(prompt, model);
-
-      // await axios.post("/api/chat/addMessage", {
-      //   chatId,
-      //   prompt: response,
-      //   role: "model",
-      // });
-
-      toast.dismiss();
-      toast.success("Response Generated.");
-
-      router.refresh();
-      return response;
-    } catch (error) {
-      console.error(error);
-      toast.error(`${error} Failed to send message`);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const removeFile = () => {
+  //   form.setValue("file", undefined);
+  //   setAttachedFileName(null);
+  //   if (fileInputRef.current) {
+  //     fileInputRef.current.value = "";
+  //   }
+  // };
 
   return (
     <form
@@ -138,7 +81,7 @@ const ChatInput = ({ chatId }: Props) => {
           <div className="absolute -top-9 left-1 z-10">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 border border-slate-200 rounded-lg text-xs text-slate-600 shadow-sm">
               <FileIcon size={12} className="text-slate-400 shrink-0" />
-              <span className="max-w-[180px] truncate">{attachedFileName}</span>
+              <span className="max-w-45 truncate">{attachedFileName}</span>
               <button
                 type="button"
                 onClick={removeFile}
@@ -173,7 +116,7 @@ const ChatInput = ({ chatId }: Props) => {
           )}
         />
 
-        <Controller
+        {/* <Controller
           control={form.control}
           name="model"
           render={({ field, fieldState }) => {
@@ -191,8 +134,8 @@ const ChatInput = ({ chatId }: Props) => {
               </FieldSet>
             );
           }}
-        />
-        <Controller
+        /> */}
+        {/* <Controller
           control={form.control}
           name="file"
           render={({ field }) => (
@@ -228,7 +171,7 @@ const ChatInput = ({ chatId }: Props) => {
               </Button>
             </Field>
           )}
-        />
+        /> */}
 
         <Button
           type="submit"

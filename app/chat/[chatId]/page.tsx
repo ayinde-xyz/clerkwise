@@ -3,14 +3,21 @@ import Chat from "@/components/chat/chat";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import ChatInterface from "@/components/chat/chatinterface";
+import { getMessagesByChatId } from "@/actions/newchat";
 
-const ChatPage = async () => {
+type ChatPageProps = {
+  params: Promise<{
+    chatId: string;
+  }>;
+};
+
+const ChatPage = async ({ params }: ChatPageProps) => {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
+  const { chatId } = await params;
 
-  // const params = searchParams ? await searchParams : undefined;
-  // const { id } = params || {};
+  const messages = await getMessagesByChatId(chatId);
 
   if (!session || !session.user) {
     return notFound();
@@ -20,7 +27,7 @@ const ChatPage = async () => {
     <div className="flex flex-col overflow-hidden w-full h-screen">
       {/* <p>Yes i am still there</p> */}
       {/* Chat */}
-      <ChatInterface />
+      <ChatInterface initialMessages={messages} chatId={chatId} />
     </div>
   );
 };

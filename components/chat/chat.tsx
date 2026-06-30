@@ -1,16 +1,15 @@
 import Message from "@/components/chat/message";
 import { EmptyChat } from "@/components/chat/emptychat";
 import { cn } from "@/lib/utils";
-import { getMessagesByChatId } from "@/actions/newchat";
 import ChatHeader from "./chatheader";
+import { Message as MessageType } from "@/drizzle/schema";
 
 type Props = {
   chatId?: string;
+  messages: MessageType[];
 };
 
-// const fetcher = (url: string) => axios.get(url).then((res) => res.data);
-
-const Chat = async ({ chatId }: Props) => {
+const Chat = ({ chatId, messages }: Props) => {
   if (!chatId)
     return (
       <div className="flex-1 overflew-y-auto ">
@@ -18,17 +17,6 @@ const Chat = async ({ chatId }: Props) => {
         <EmptyChat message={"Create a new chat to get started!"} />
       </div>
     );
-
-  // const {
-  //   data: messages,
-  //   error,
-  //   isLoading,
-  // } = useSWR<MessageType[]>(
-  //   `/api/chat/fetchMessages?chatId=${chatId}`,
-  //   fetcher,
-  // );
-
-  const messages = await getMessagesByChatId(chatId);
 
   return (
     <div className="flex-1 overflow-y-auto overflow-x-hidden relative">

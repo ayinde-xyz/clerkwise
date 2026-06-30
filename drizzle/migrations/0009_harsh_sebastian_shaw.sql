@@ -1,0 +1,1 @@
+ALTER TABLE "Message" ALTER COLUMN "attachments" DROP NOT NULL;

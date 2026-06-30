@@ -6,13 +6,17 @@ import { Session } from "@/lib/auth-client";
 import { asc, eq } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
 
-export const getChats = async (session: Session) => {
-  const response = await db
-    .select()
-    .from(chat)
-    .where(eq(chat.userId, session.user?.id || ""));
+export const newChat = async (session: Session) => {
+  const [created] = await db
+    .insert(chat)
+    .values({
+      userId: session?.user.id || "",
+      title: "New Chat",
+      createdAt: new Date(),
+    })
+    .returning({ id: chat.id });
 
-  return response;
+  return created.id;
 };
 
 export const getMessagesByChatId = async (chatId: string) => {
@@ -29,6 +33,35 @@ export const getMessagesByChatId = async (chatId: string) => {
   );
 
   return await getMessages();
+};
+
+export const addMessagesByChatId = async (
+  chatId: string,
+  prompt: string,
+  role: "user" | "assistant",
+) => {
+  const checkMessageWithId = await db.query.message.findMany({
+    where: (message, { eq }) => eq(message.chatId, chatId),
+  });
+
+  if (!checkMessageWithId.length) {
+    await db.update(chat).set({ title: prompt }).where(eq(chat.id, chatId));
+  }
+
+  const addMessages = await db
+    .insert(message)
+    .values({
+      content: prompt,
+      chatId,
+      attachments: [],
+      role,
+      createdAt: new Date(),
+    })
+    .returning({
+      id: message.id,
+    });
+
+  return addMessages;
 };
 
 // Revalidation functions
