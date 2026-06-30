@@ -29,7 +29,7 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
   const createNewChat = async () => {
     if (!session.data) return;
     const newChatId = await newChat(session.data);
-    redirect(`/chat?id=${newChatId}`);
+    redirect(`/chat/${newChatId}`);
   };
 
   const {
