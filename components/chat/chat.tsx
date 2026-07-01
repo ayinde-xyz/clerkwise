@@ -25,7 +25,7 @@ const Chat = ({ chatId, messages }: Props) => {
       {!messages?.length && <EmptyChat />}
       <div className={cn("flex flex-col", !messages?.length && "hidden")}>
         {messages &&
-          messages.map((message: any) => (
+          messages.map((message: MessageType) => (
             <Message key={message.id} message={message} />
           ))}
       </div>

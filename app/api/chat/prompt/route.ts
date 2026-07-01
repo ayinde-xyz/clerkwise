@@ -25,18 +25,18 @@ export async function POST(req: NextRequest) {
 
     const response = await askLLM(prompt);
 
-    const reader = response.getReader();
-    let firstChunk: ReadableStreamReadResult<Uint8Array>;
-    try {
-      firstChunk = await reader.read();
-    } catch (streamErr: any) {
-      return NextResponse.json(
-        { error: streamErr?.message || "Failed to generate response" },
-        { status: 503 },
-      );
-    }
+    // const reader = response.getReader();
+    // let firstChunk: ReadableStreamReadResult<Uint8Array>;
+    // try {
+    //   firstChunk = await reader.read();
+    // } catch (streamErr: any) {
+    //   return NextResponse.json(
+    //     { error: streamErr?.message || "Failed to generate response" },
+    //     { status: 503 },
+    //   );
+    // }
 
-    console.log("LLM Response:", response); // Log the response for debugging purposes
+    //console.log("LLM Response:", response);
 
     return NextResponse.json({ response });
   } catch (error) {

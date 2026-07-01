@@ -17,11 +17,14 @@ import { toast } from "sonner";
 import axios from "axios";
 
 type ChatInterfaceProps = {
-  initialMessages: Message[];
-  chatId: string;
+  initialMessages?: Message[];
+  chatId?: string;
 };
 
-const ChatInterface = ({ initialMessages, chatId }: ChatInterfaceProps) => {
+const ChatInterface = ({
+  initialMessages = [],
+  chatId,
+}: ChatInterfaceProps) => {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [loading, setLoading] = useState(false);
   const store = useModel();
@@ -39,6 +42,7 @@ const ChatInterface = ({ initialMessages, chatId }: ChatInterfaceProps) => {
   });
 
   const sendMessage = async (values: ChatSchemaType) => {
+    if (!chatId) return;
     try {
       setLoading(true);
 
@@ -47,7 +51,6 @@ const ChatInterface = ({ initialMessages, chatId }: ChatInterfaceProps) => {
       const { prompt, model, file } = values;
 
       const userMessage = {
-        id: Date.now().toString(),
         chatId,
         role: "user",
         createdAt: new Date(),
@@ -81,10 +84,39 @@ const ChatInterface = ({ initialMessages, chatId }: ChatInterfaceProps) => {
         }),
       });
 
+      console.log("This is the ai response", response.json());
+
+      if (!response.ok) {
+        throw new Error("Failed to generate response");
+      }
+
+      if (!response.body) {
+        throw new Error();
+      }
+
+      const data = await response.body.getReader();
+      console.log(data, "contentText");
+      const contentText = data.content || "";
+
+      const assistantResponse = {
+        chatId,
+        role: "model",
+        content: contentText,
+        createdAt: new Date(),
+      };
+
+      setMessages((prev) => [...prev, assistantResponse]);
+
+      await axios.post("/api/chat/addMessage", {
+        chatId,
+        prompt: contentText,
+        role: "assistant",
+      });
+
       toast.dismiss();
       toast.success("Response Generated.");
+      toast.dismiss();
 
-      router.refresh();
       return response;
     } catch (error) {
       console.error(error);
