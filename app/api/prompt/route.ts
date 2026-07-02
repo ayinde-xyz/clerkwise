@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth";
-import { askLLM } from "@/lib/langchain";
+import { streamLLM } from "@/lib/langchain";
 import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -21,26 +21,34 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { readable, writable } = new TransformStream();
+    const stream = await streamLLM(prompt);
+    const encoder = new TextEncoder();
 
-    const response = await askLLM(prompt);
+    const customStream = new ReadableStream({
+      async start(controller) {
+        try {
+          for await (const chunk of stream) {
+            const content = chunk.content;
+            if (content) {
+              controller.enqueue(encoder.encode(content.toString()));
+            }
+          }
+          controller.close();
+        } catch (err) {
+          controller.error(err);
+        }
+      },
+    });
 
-    // const reader = response.getReader();
-    // let firstChunk: ReadableStreamReadResult<Uint8Array>;
-    // try {
-    //   firstChunk = await reader.read();
-    // } catch (streamErr: any) {
-    //   return NextResponse.json(
-    //     { error: streamErr?.message || "Failed to generate response" },
-    //     { status: 503 },
-    //   );
-    // }
-
-    //console.log("LLM Response:", response);
-
-    return NextResponse.json({ response });
+    return new Response(customStream, {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive",
+      },
+    });
   } catch (error) {
-    console.error("Error in POST /api/chat/prompt:", error);
+    console.error("Error in POST /api/prompt:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 },
