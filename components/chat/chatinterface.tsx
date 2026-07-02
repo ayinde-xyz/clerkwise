@@ -17,15 +17,17 @@ import { toast } from "sonner";
 import axios from "axios";
 
 type ChatInterfaceProps = {
-  initialMessages: Message[];
-  chatId: string;
+  initialMessages?: Message[];
+  chatId?: string;
 };
 
-const ChatInterface = ({ initialMessages, chatId }: ChatInterfaceProps) => {
+const ChatInterface = ({
+  initialMessages = [],
+  chatId,
+}: ChatInterfaceProps) => {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [loading, setLoading] = useState(false);
   const store = useModel();
-  const router = useRouter();
   const [attachedFileName, setAttachedFileName] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -39,6 +41,7 @@ const ChatInterface = ({ initialMessages, chatId }: ChatInterfaceProps) => {
   });
 
   const sendMessage = async (values: ChatSchemaType) => {
+    if (!chatId) return;
     try {
       setLoading(true);
 
@@ -46,8 +49,12 @@ const ChatInterface = ({ initialMessages, chatId }: ChatInterfaceProps) => {
 
       const { prompt, model, file } = values;
 
+      const userMessageId =
+        typeof window !== "undefined" && window.crypto?.randomUUID
+          ? window.crypto.randomUUID()
+          : Math.random().toString(36).substring(2);
       const userMessage = {
-        id: Date.now().toString(),
+        id: userMessageId,
         chatId,
         role: "user",
         createdAt: new Date(),
@@ -59,7 +66,7 @@ const ChatInterface = ({ initialMessages, chatId }: ChatInterfaceProps) => {
       form.reset({ ...values, prompt: "" });
       setAttachedFileName(null);
 
-      const addMessages = await axios.post("/api/chat/addMessage", {
+      const addMessages = await axios.post("/api/chat", {
         chatId,
         prompt,
         role: "user",
@@ -73,7 +80,7 @@ const ChatInterface = ({ initialMessages, chatId }: ChatInterfaceProps) => {
       }
       toast.dismiss();
 
-      const response = await fetch("/api/chat/prompt", {
+      const response = await fetch("/api/prompt", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -81,10 +88,58 @@ const ChatInterface = ({ initialMessages, chatId }: ChatInterfaceProps) => {
         }),
       });
 
+      if (!response.ok) {
+        throw new Error("Failed to generate response");
+      }
+
+      if (!response.body) {
+        throw new Error("No response body");
+      }
+
+      const assistantMessageId =
+        typeof window !== "undefined" && window.crypto?.randomUUID
+          ? window.crypto.randomUUID()
+          : Math.random().toString(36).substring(2);
+      const assistantResponse = {
+        id: assistantMessageId,
+        chatId,
+        role: "model",
+        content: "",
+        createdAt: new Date(),
+      };
+
+      setMessages((prev) => [...prev, assistantResponse]);
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let contentText = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunkText = decoder.decode(value, { stream: true });
+        contentText += chunkText;
+
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === assistantMessageId
+              ? { ...msg, content: contentText }
+              : msg,
+          ),
+        );
+      }
+
+      await axios.post("/api/chat", {
+        chatId,
+        prompt: contentText,
+        role: "assistant",
+      });
+
       toast.dismiss();
       toast.success("Response Generated.");
+      toast.dismiss();
 
-      router.refresh();
       return response;
     } catch (error) {
       console.error(error);
