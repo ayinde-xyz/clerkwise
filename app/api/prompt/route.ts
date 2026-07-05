@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
 import { streamLLM } from "@/lib/langchain";
+import { rateLimit } from "@/lib/upstash";
 import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -7,17 +8,37 @@ export async function POST(req: NextRequest) {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
+
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   const origin = (await headers()).get("origin");
+
   const allowedOrigins = [
     process.env.NEXT_PUBLIC_APP_URL!,
     "http://localhost:3000",
   ];
-  if (!origin && allowedOrigins.includes(origin)) {
+
+  if (!origin || !allowedOrigins.includes(origin)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { success, limit, remaining, reset } = await rateLimit.limit(
+    session.user.id,
+  );
+
+  if (!success) {
+    return NextResponse.json(
+      { error: "Too many requests. Slow down." },
+      {
+        status: 429,
+        headers: {
+          "X-RateLimit-Limit": limit.toString(),
+          "X-RateLimit-Remaining": remaining.toString(),
+          "X-RateLimit-Reset": reset.toString(),
+        },
+      },
+    );
   }
 
   const body = await req.json();
