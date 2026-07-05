@@ -76,10 +76,10 @@ export async function POST(req: NextRequest) {
         Connection: "keep-alive",
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error in POST /api/prompt:", error);
     return NextResponse.json(
-      { error: "Internal Server Error" },
+      { error: error.message || "Internal Server Error" },
       { status: 500 },
     );
   }

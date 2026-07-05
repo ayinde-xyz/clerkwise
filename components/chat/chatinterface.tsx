@@ -29,6 +29,7 @@ const ChatInterface = ({
   const [loading, setLoading] = useState(false);
   const store = useModel();
   const [attachedFileName, setAttachedFileName] = useState<string | null>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<ChatSchemaType>({
@@ -110,6 +111,11 @@ const ChatInterface = ({
 
       setMessages((prev) => [...prev, assistantResponse]);
 
+      setTimeout(
+        () => bottomRef.current?.scrollIntoView({ behavior: "smooth" }),
+        100,
+      );
+
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let contentText = "";
@@ -151,7 +157,7 @@ const ChatInterface = ({
 
   return (
     <>
-      <Chat chatId={chatId} messages={messages} />
+      <Chat chatId={chatId} messages={messages} loading={loading} />
       <ChatInput
         chatId={chatId}
         form={form}

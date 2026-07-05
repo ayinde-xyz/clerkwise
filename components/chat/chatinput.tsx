@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { RefObject, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,15 +29,15 @@ type Props = {
 };
 const ChatInput = ({ chatId, form, sendMessage, loading }: Props) => {
   const [attachedFileName, setAttachedFileName] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  // const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const removeFile = () => {
-    form.setValue("file", undefined);
-    setAttachedFileName(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
+  // const removeFile = () => {
+  //   form.setValue("file", undefined);
+  //   setAttachedFileName(null);
+  //   if (fileInputRef.current) {
+  //     fileInputRef.current.value = "";
+  //   }
+  // };
 
   // Keep form model in sync when store changes (e.g., sidebar selection)
 
@@ -74,10 +74,11 @@ const ChatInput = ({ chatId, form, sendMessage, loading }: Props) => {
     <form
       onSubmit={form.handleSubmit(sendMessage)}
       className="relative bg-transparent w-full max-w-2xl mx-auto  rounded-2xl  text-sm">
-      <div className="absolute -top-15 inset-x-0 h-15 bg-linear-to-t from-white via-white/50 to-transparent pointer-events-none blur-sm" />
+      {/* Blurring design */}
+      {/* <div className="absolute -top-15 inset-x-0 h-15 bg-linear-to-t from-white via-white/50 to-transparent pointer-events-none blur-sm" /> */}
       <FieldGroup>
         {/* File attachment chip */}
-        {attachedFileName && (
+        {/* {attachedFileName && (
           <div className="absolute -top-9 left-1 z-10">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 border border-slate-200 rounded-lg text-xs text-slate-600 shadow-sm">
               <FileIcon size={12} className="text-slate-400 shrink-0" />
@@ -91,7 +92,7 @@ const ChatInput = ({ chatId, form, sendMessage, loading }: Props) => {
               </button>
             </div>
           </div>
-        )}
+        )} */}
 
         <Controller
           control={form.control}

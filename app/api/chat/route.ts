@@ -1,7 +1,7 @@
 import { db } from "@/drizzle";
 import { chat, message } from "@/drizzle/schema";
 import { auth } from "@/lib/auth";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { revalidatePath, updateTag } from "next/cache";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
@@ -93,8 +93,13 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" });
     }
 
-    // await db.delete(message).where(eq(message.chatId, id));
-    await db.delete(chat).where(eq(chat.id, chatId));
+    const result = await db
+      .delete(chat)
+      .where(and(eq(chat.id, chatId), eq(chat.userId, session.user.id)))
+      .returning({ id: chat.id });
+    if (!result.length) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
 
     return NextResponse.json(
       { message: "Chat deleted successfully." },
