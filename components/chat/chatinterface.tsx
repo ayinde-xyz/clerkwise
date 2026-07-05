@@ -133,7 +133,7 @@ const ChatInterface = ({
       await axios.post("/api/chat", {
         chatId,
         prompt: contentText,
-        role: "assistant",
+        role: "model",
       });
 
       toast.dismiss();
