@@ -1,13 +1,16 @@
 "use client";
-import { useRef, useState } from "react";
+import { RefObject, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { aiResponse } from "@/actions/prompt";
-import { uploadFile } from "@/actions/upload";
 import { Controller, useForm, UseFormReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { PaperclipIcon, SendIcon, XIcon, FileIcon } from "lucide-react";
+import {
+  PaperclipIcon,
+  SendIcon,
+  XIcon,
+  FileIcon,
+  SquareIcon,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Field, FieldGroup, FieldSet } from "../ui/field";
 import {
@@ -22,22 +25,28 @@ import { useRouter } from "next/navigation";
 import { ChatSchemaType } from "@/schemas";
 
 type Props = {
-  chatId?: string;
   form: UseFormReturn<ChatSchemaType>;
   sendMessage: (values: ChatSchemaType) => Promise<Response | undefined>;
   loading: boolean;
+  isStreaming: boolean;
+  stopStream: () => void;
 };
-const ChatInput = ({ chatId, form, sendMessage, loading }: Props) => {
-  const [attachedFileName, setAttachedFileName] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+const ChatInput = ({
+  form,
+  sendMessage,
+  loading,
+  isStreaming,
+  stopStream,
+}: Props) => {
+  // const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const removeFile = () => {
-    form.setValue("file", undefined);
-    setAttachedFileName(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
+  // const removeFile = () => {
+  //   form.setValue("file", undefined);
+  //   setAttachedFileName(null);
+  //   if (fileInputRef.current) {
+  //     fileInputRef.current.value = "";
+  //   }
+  // };
 
   // Keep form model in sync when store changes (e.g., sidebar selection)
 
@@ -70,14 +79,17 @@ const ChatInput = ({ chatId, form, sendMessage, loading }: Props) => {
   //   }
   // };
 
+  const showStopButton = loading && isStreaming;
+
   return (
     <form
       onSubmit={form.handleSubmit(sendMessage)}
       className="relative bg-transparent w-full max-w-2xl mx-auto  rounded-2xl  text-sm">
-      <div className="absolute -top-15 inset-x-0 h-15 bg-linear-to-t from-white via-white/50 to-transparent pointer-events-none blur-sm" />
+      {/* Blurring design */}
+      {/* <div className="absolute -top-15 inset-x-0 h-15 bg-linear-to-t from-white via-white/50 to-transparent pointer-events-none blur-sm" /> */}
       <FieldGroup>
         {/* File attachment chip */}
-        {attachedFileName && (
+        {/* {attachedFileName && (
           <div className="absolute -top-9 left-1 z-10">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 border border-slate-200 rounded-lg text-xs text-slate-600 shadow-sm">
               <FileIcon size={12} className="text-slate-400 shrink-0" />
@@ -91,7 +103,7 @@ const ChatInput = ({ chatId, form, sendMessage, loading }: Props) => {
               </button>
             </div>
           </div>
-        )}
+        )} */}
 
         <Controller
           control={form.control}
@@ -173,14 +185,25 @@ const ChatInput = ({ chatId, form, sendMessage, loading }: Props) => {
           )}
         /> */}
 
-        <Button
-          type="submit"
-          variant={"ghost"}
-          size={"icon"}
-          disabled={loading}
-          className="hover:opacity-50 font-bold p-1.5 absolute bottom-1 right-0  rounded-full disabled:bg-gray-300 disabled:cursor-not-allowed">
-          <SendIcon size={14} />
-        </Button>
+        {showStopButton ? (
+          <Button
+            className="hover:opacity-50 font-bold p-1.5 absolute bottom-1 right-0  rounded-full disabled:bg-gray-300 disabled:cursor-not-allowed"
+            type="button"
+            variant={"destructive"}
+            size={"icon"}
+            onClick={stopStream}>
+            <SquareIcon size={14} />
+          </Button>
+        ) : (
+          <Button
+            type="submit"
+            variant={"ghost"}
+            size={"icon"}
+            disabled={loading || !form.watch("prompt")}
+            className="hover:opacity-50 font-bold p-1.5 absolute bottom-1 right-0  rounded-full disabled:bg-gray-300 disabled:cursor-not-allowed">
+            <SendIcon size={14} />
+          </Button>
+        )}
       </FieldGroup>
     </form>
   );
