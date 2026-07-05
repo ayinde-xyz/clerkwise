@@ -1,7 +1,7 @@
 "use client";
 import Chat from "./chat";
 import ChatInput from "./chatinput";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Message } from "@/drizzle/schema";
 import {
   ChatSchema,
@@ -27,6 +27,8 @@ const ChatInterface = ({
 }: ChatInterfaceProps) => {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [loading, setLoading] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const store = useModel();
   const [attachedFileName, setAttachedFileName] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -40,6 +42,13 @@ const ChatInterface = ({
       file: undefined,
     },
   });
+
+  const stopStream = useCallback(() => {
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = null;
+    setLoading(false);
+    setIsStreaming(false);
+  }, []);
 
   const sendMessage = async (values: ChatSchemaType) => {
     if (!chatId) return;
@@ -111,10 +120,8 @@ const ChatInterface = ({
 
       setMessages((prev) => [...prev, assistantResponse]);
 
-      setTimeout(
-        () => bottomRef.current?.scrollIntoView({ behavior: "smooth" }),
-        100,
-      );
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
@@ -125,6 +132,7 @@ const ChatInterface = ({
         if (done) break;
 
         const chunkText = decoder.decode(value, { stream: true });
+        if (!isStreaming) setIsStreaming(true);
         contentText += chunkText;
 
         setMessages((prev) =>
@@ -149,9 +157,11 @@ const ChatInterface = ({
       return response;
     } catch (error) {
       console.error(error);
-      toast.error(`${error} Failed to send message`);
+      toast.error(`${error}`);
     } finally {
+      abortControllerRef.current = null;
       setLoading(false);
+      setIsStreaming(false);
     }
   };
 
@@ -159,10 +169,11 @@ const ChatInterface = ({
     <>
       <Chat chatId={chatId} messages={messages} loading={loading} />
       <ChatInput
-        chatId={chatId}
         form={form}
         sendMessage={sendMessage}
         loading={loading}
+        isStreaming={isStreaming}
+        stopStream={stopStream}
       />
     </>
   );

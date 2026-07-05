@@ -27,7 +27,8 @@ const Chat = ({ chatId, messages, loading }: Props) => {
       </div>
     );
 
-  const isLastMessageFromUser = messages.length > 0 && messages[messages.length - 1].role === "user";
+  const isLastMessageFromUser =
+    messages.length > 0 && messages[messages.length - 1].role === "user";
   const showTypingIndicator = loading && isLastMessageFromUser;
 
   return (
@@ -41,7 +42,7 @@ const Chat = ({ chatId, messages, loading }: Props) => {
             <Message key={message.id} message={message} />
           ))}
         {showTypingIndicator && (
-          <div className="py-5 px-4 md:px-10 max-w-2xl">
+          <div className="flex justify-end">
             <TypingIndicator />
           </div>
         )}
