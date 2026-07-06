@@ -136,8 +136,8 @@ const ChatInput = ({
                 />
                 <InputGroupAddon align="block-end">
                   <InputGroupText
-                    className={`tabular-nums ${field.value.length > 100 ? "text-destructive" : ""}`}>
-                    {field.value.length}/100 chars
+                    className={`tabular-nums ${field.value.trim().length > 90 ? "text-destructive" : ""}`}>
+                    {field.value.trim().length}/100 chars
                   </InputGroupText>
                 </InputGroupAddon>
               </InputGroup>

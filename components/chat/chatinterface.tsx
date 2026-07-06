@@ -12,7 +12,6 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import useModel from "@/hooks/use-model";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import axios from "axios";
 
@@ -43,6 +42,21 @@ const ChatInterface = ({
     },
   });
 
+  const getApiErrorMessage = async (response: Response): Promise<string> => {
+    const fallbackMessage = `API error: ${response.status}`;
+
+    try {
+      const data = await response.json();
+      if (typeof data?.error === "string" && data.error.trim().length > 0) {
+        return data.error;
+      }
+    } catch {
+      // Ignore JSON parse errors and use fallback status text.
+    }
+
+    return fallbackMessage;
+  };
+
   const stopStream = useCallback(() => {
     abortControllerRef.current?.abort();
     abortControllerRef.current = null;
@@ -52,6 +66,8 @@ const ChatInterface = ({
 
   const sendMessage = async (values: ChatSchemaType) => {
     if (!chatId) return;
+    let userMessageId = "";
+    let assistantMessageId = "";
     try {
       setLoading(true);
 
@@ -59,7 +75,7 @@ const ChatInterface = ({
 
       const { prompt, model, file } = values;
 
-      const userMessageId =
+      userMessageId =
         typeof window !== "undefined" && window.crypto?.randomUUID
           ? window.crypto.randomUUID()
           : Math.random().toString(36).substring(2);
@@ -69,6 +85,7 @@ const ChatInterface = ({
         role: "user",
         createdAt: new Date(),
         content: prompt,
+        success: true,
       };
 
       setMessages((prev) => [...prev, userMessage]);
@@ -99,26 +116,29 @@ const ChatInterface = ({
       });
 
       if (!response.ok) {
-        throw new Error("Failed to generate response");
+        const errorMessage = await getApiErrorMessage(response);
+        throw new Error(errorMessage);
       }
 
       if (!response.body) {
         throw new Error("No response body");
       }
 
-      const assistantMessageId =
+      assistantMessageId =
         typeof window !== "undefined" && window.crypto?.randomUUID
           ? window.crypto.randomUUID()
           : Math.random().toString(36).substring(2);
-      const assistantResponse = {
-        id: assistantMessageId,
-        chatId,
-        role: "model",
-        content: "",
-        createdAt: new Date(),
-      };
 
-      setMessages((prev) => [...prev, assistantResponse]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: assistantMessageId,
+          chatId,
+          role: "model",
+          content: "",
+          createdAt: new Date(),
+        },
+      ]);
 
       const controller = new AbortController();
       abortControllerRef.current = controller;
@@ -150,14 +170,31 @@ const ChatInterface = ({
         role: "model",
       });
 
-      toast.dismiss();
-      toast.success("Response Generated.");
-      toast.dismiss();
-
       return response;
-    } catch (error) {
+    } catch (error: any) {
+      if (error.name !== "AbortError") {
+        const errorMessage =
+          typeof error?.message === "string" && error.message.trim().length > 0
+            ? error.message
+            : "Failed to send message. Please try again.";
+        toast.error(errorMessage);
+
+        setMessages((prev) =>
+          prev
+            .map((m) => (m.id === userMessageId ? { ...m, success: false } : m))
+            .filter((m) => m.id !== assistantMessageId),
+        );
+      } else {
+        setMessages(
+          (prev) =>
+            prev
+              .map((m) =>
+                m.id === assistantMessageId && m.content === "" ? null : m,
+              )
+              .filter(Boolean) as Message[],
+        );
+      }
       console.error(error);
-      toast.error(`${error}`);
     } finally {
       abortControllerRef.current = null;
       setLoading(false);

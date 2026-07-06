@@ -1,0 +1,1 @@
+ALTER TABLE "Message" ALTER COLUMN "success" SET DEFAULT true;

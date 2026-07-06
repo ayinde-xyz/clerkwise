@@ -98,6 +98,7 @@ export const message = pgTable("Message", {
   content: text("parts").notNull(),
   attachments: json("attachments"),
   createdAt: timestamp("createdAt").notNull(),
+  success: boolean("success").default(true).notNull(),
 });
 
 export type Message = InferInsertModel<typeof message>;
