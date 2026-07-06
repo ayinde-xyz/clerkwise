@@ -10,9 +10,10 @@ type Props = {
   chatId?: string;
   messages: MessageType[];
   loading?: boolean;
+  retrySendMessage?: (message: MessageType) => Promise<Response | undefined>;
 };
 
-const Chat = ({ chatId, messages, loading }: Props) => {
+const Chat = ({ chatId, messages, loading, retrySendMessage }: Props) => {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -39,7 +40,11 @@ const Chat = ({ chatId, messages, loading }: Props) => {
       <div className={cn("flex flex-col", !messages?.length && "hidden")}>
         {messages &&
           messages.map((message: MessageType) => (
-            <Message key={message.id} message={message} />
+            <Message
+              key={message.id}
+              message={message}
+              retrySendMessage={retrySendMessage}
+            />
           ))}
         {showTypingIndicator && (
           <div className="flex justify-end">

@@ -26,14 +26,14 @@ import { ChatSchemaType } from "@/schemas";
 
 type Props = {
   form: UseFormReturn<ChatSchemaType>;
-  sendMessage: (values: ChatSchemaType) => Promise<Response | undefined>;
+  handleSendMessage: (values: ChatSchemaType) => Promise<Response | undefined>;
   loading: boolean;
   isStreaming: boolean;
   stopStream: () => void;
 };
 const ChatInput = ({
   form,
-  sendMessage,
+  handleSendMessage,
   loading,
   isStreaming,
   stopStream,
@@ -94,7 +94,7 @@ const ChatInput = ({
 
   return (
     <form
-      onSubmit={form.handleSubmit(sendMessage)}
+      onSubmit={form.handleSubmit(handleSendMessage)}
       className="relative bg-transparent w-full max-w-2xl mx-auto  rounded-2xl  text-sm">
       {/* Blurring design */}
       {/* <div className="absolute -top-15 inset-x-0 h-15 bg-linear-to-t from-white via-white/50 to-transparent pointer-events-none blur-sm" /> */}
@@ -136,8 +136,8 @@ const ChatInput = ({
                 />
                 <InputGroupAddon align="block-end">
                   <InputGroupText
-                    className={`tabular-nums ${field.value.trim().length > 90 ? "text-destructive" : ""}`}>
-                    {field.value.trim().length}/100 chars
+                    className={`tabular-nums ${(field.value ?? "").trim().length > 90 ? "text-destructive" : ""}`}>
+                    {(field.value ?? "").trim().length}/100 chars
                   </InputGroupText>
                 </InputGroupAddon>
               </InputGroup>

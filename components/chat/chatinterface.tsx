@@ -64,7 +64,7 @@ const ChatInterface = ({
     setIsStreaming(false);
   }, []);
 
-  const sendMessage = async (values: ChatSchemaType) => {
+  const sendMessage = async (prompt: string) => {
     if (!chatId) return;
     let userMessageId = "";
     let assistantMessageId = "";
@@ -73,7 +73,7 @@ const ChatInterface = ({
 
       toast.loading("Sending message...");
 
-      const { prompt, model, file } = values;
+     
 
       userMessageId =
         typeof window !== "undefined" && window.crypto?.randomUUID
@@ -90,7 +90,7 @@ const ChatInterface = ({
 
       setMessages((prev) => [...prev, userMessage]);
 
-      form.reset({ ...values, prompt: "" });
+      
       setAttachedFileName(null);
 
       const addMessages = await axios.post("/api/chat", {
@@ -172,6 +172,7 @@ const ChatInterface = ({
 
       return response;
     } catch (error: any) {
+      console.error(error);
       if (error.name !== "AbortError") {
         const errorMessage =
           typeof error?.message === "string" && error.message.trim().length > 0
@@ -194,7 +195,6 @@ const ChatInterface = ({
               .filter(Boolean) as Message[],
         );
       }
-      console.error(error);
     } finally {
       abortControllerRef.current = null;
       setLoading(false);
@@ -202,12 +202,21 @@ const ChatInterface = ({
     }
   };
 
+  const handleSendMessage = useCallback(
+    async (values: ChatSchemaType) => {
+      form.reset({ ...values, prompt: "" });
+      const response = await sendMessage(values.prompt);
+      return response;
+    },
+    [sendMessage, form],
+  );
+
   return (
     <>
       <Chat chatId={chatId} messages={messages} loading={loading} />
       <ChatInput
         form={form}
-        sendMessage={sendMessage}
+        handleSendMessage={handleSendMessage}
         loading={loading}
         isStreaming={isStreaming}
         stopStream={stopStream}
