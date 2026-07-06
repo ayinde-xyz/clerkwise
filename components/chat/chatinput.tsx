@@ -1,5 +1,5 @@
 "use client";
-import { RefObject, useRef, useState } from "react";
+import { RefObject, useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Controller, useForm, UseFormReturn } from "react-hook-form";
@@ -38,6 +38,17 @@ const ChatInput = ({
   isStreaming,
   stopStream,
 }: Props) => {
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const promptValue = form.watch("prompt");
+
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = "auto";
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    }
+  }, [promptValue]);
+
   // const fileInputRef = useRef<HTMLInputElement>(null);
 
   // const removeFile = () => {
@@ -109,18 +120,24 @@ const ChatInput = ({
           control={form.control}
           name="prompt"
           render={({ field, fieldState }) => (
-            <Field className=" max-w-2xl bg-slate-200 rounded-2xl p-3">
-              <InputGroup className="h-auto ">
+            <Field className="max-w-2xl bg-slate-200 rounded-2xl p-1">
+              <InputGroup>
                 <InputGroupTextarea
                   disabled={loading}
+                  className=" resize-none"
                   {...field}
+                  ref={(e) => {
+                    field.ref(e);
+                    textareaRef.current = e;
+                  }}
                   aria-invalid={fieldState.invalid}
                   id="block-end-input"
-                  placeholder="Ask Neuralis"
+                  placeholder="Ask Clerksmart"
                 />
                 <InputGroupAddon align="block-end">
-                  <InputGroupText className="tabular-nums">
-                    {field.value.length}/100 characters
+                  <InputGroupText
+                    className={`tabular-nums ${field.value.length > 100 ? "text-destructive" : ""}`}>
+                    {field.value.length}/100 chars
                   </InputGroupText>
                 </InputGroupAddon>
               </InputGroup>
