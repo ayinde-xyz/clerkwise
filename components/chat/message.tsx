@@ -1,4 +1,4 @@
-import { RotateCwIcon, TrashIcon } from "lucide-react";
+import { EditIcon, RotateCwIcon, TrashIcon } from "lucide-react";
 import { Button } from "../ui/button";
 import CopyButton from "./copybutton";
 import { Message as MessageType } from "@/drizzle/schema";
@@ -8,6 +8,7 @@ type Props = {
   retrySendMessage?: (message: MessageType) => Promise<Response | undefined>;
   loading: boolean;
   handleDeleteMessage?: (messageId: string) => Promise<void>;
+  handleEditMessage: (message: string) => Promise<void>;
 };
 
 const Message = ({
@@ -15,6 +16,7 @@ const Message = ({
   retrySendMessage,
   loading,
   handleDeleteMessage,
+  handleEditMessage,
 }: Props) => {
   const isModel = message.role === "model";
 
@@ -64,12 +66,14 @@ const Message = ({
             </div>
           )}
           <div>
-            <CopyButton text={message.content} />
+            {isModel && <CopyButton text={message.content} />}
+
             {!isModel && !message.success && (
               <Button
                 variant={"ghost"}
                 size={"icon"}
                 disabled={loading}
+                className="focus:translate-y-1 focus:scale-95 transition-transform"
                 onClick={() => retrySendMessage?.(message)}>
                 <RotateCwIcon />
               </Button>
@@ -78,9 +82,22 @@ const Message = ({
               variant={"ghost"}
               size={"icon"}
               disabled={loading}
+              className={
+                "focus:translate-y-1 focus:scale-95 transition-transform"
+              }
               onClick={() => handleDeleteMessage?.(message.id)}>
               <TrashIcon />
             </Button>
+            {!isModel && (
+              <Button
+                variant={"ghost"}
+                size={"icon"}
+                className="focus:translate-y-1 focus:scale-95 transition-transform"
+                disabled={loading}
+                onClick={() => handleEditMessage?.(message.content)}>
+                <EditIcon />
+              </Button>
+            )}
           </div>
         </div>
       </div>

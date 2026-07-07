@@ -24,7 +24,7 @@ const ChatPage = async ({ params }: ChatPageProps) => {
   }
 
   return (
-    <div className="flex flex-col overflow-hidden w-full h-screen">
+    <div className="flex flex-col overflow-hidden w-full h-dvh relative">
       {/* <p>Yes i am still there</p> */}
       {/* Chat */}
       <ChatInterface initialMessages={messages} chatId={chatId} />

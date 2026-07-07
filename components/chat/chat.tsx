@@ -12,6 +12,7 @@ type Props = {
   loading: boolean;
   retrySendMessage?: (message: MessageType) => Promise<Response | undefined>;
   handleDeleteMessage?: (messageId: string) => Promise<void>;
+  handleEditMessage: (message: string) => Promise<void>;
 };
 
 const Chat = ({
@@ -20,6 +21,7 @@ const Chat = ({
   loading,
   retrySendMessage,
   handleDeleteMessage,
+  handleEditMessage,
 }: Props) => {
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -40,7 +42,7 @@ const Chat = ({
   const showTypingIndicator = loading && isLastMessageFromUser;
 
   return (
-    <div className="flex-1 overflow-y-auto overflow-x-hidden relative">
+    <div className="flex-1 overflow-y-auto overflow-x-hidden pb-26 relative">
       <ChatHeader messages={messages} />
 
       {!messages?.length && <EmptyChat />}
@@ -53,6 +55,7 @@ const Chat = ({
               retrySendMessage={retrySendMessage}
               loading={loading}
               handleDeleteMessage={handleDeleteMessage}
+              handleEditMessage={handleEditMessage}
             />
           ))}
         {showTypingIndicator && (

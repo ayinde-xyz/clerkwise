@@ -87,7 +87,7 @@ const ChatInput = ({
   return (
     <form
       onSubmit={form.handleSubmit(handleSendMessage)}
-      className="relative bg-transparent w-full max-w-2xl mx-auto  rounded-2xl  text-sm">
+      className="absolute bottom-0 left-0 right-0 bg-transparent w-full max-w-2xl mx-auto  rounded-2xl  text-sm">
       {/* Blurring design */}
       {/* <div className="absolute -top-15 inset-x-0 h-15 bg-linear-to-t from-white via-white/50 to-transparent pointer-events-none blur-sm" /> */}
       <FieldGroup className="mx-2">

@@ -219,6 +219,7 @@ const ChatInterface = ({
         const deletedMessageId = await deleteMessageById(messageId);
         const targetId = deletedMessageId?.[0]?.id || messageId;
         setMessages((prev) => prev.filter((msg) => msg.id !== targetId));
+        toast.success("Message deleted successfully");
       } catch (error) {
         console.error("Failed to delete message:", error);
         // Fallback: remove from UI anyway
@@ -226,6 +227,14 @@ const ChatInterface = ({
       }
     },
     [loading, deleteMessageById, setMessages],
+  );
+
+  const handleEditMessage = useCallback(
+    async (message: string) => {
+      if (loading) return;
+      form.setValue("prompt", message);
+    },
+    [form],
   );
 
   const retrySendMessage = useCallback(
@@ -245,6 +254,7 @@ const ChatInterface = ({
         loading={loading}
         retrySendMessage={retrySendMessage}
         handleDeleteMessage={handleDeleteMessage}
+        handleEditMessage={handleEditMessage}
       />
       <ChatInput
         form={form}
