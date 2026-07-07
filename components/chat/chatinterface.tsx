@@ -230,6 +230,7 @@ const ChatInterface = ({
         console.error("Failed to delete message:", error);
         // Fallback: remove from UI anyway
         setMessages((prev) => prev.filter((msg) => msg.id !== messageId));
+        toast.error("Failed to delete message. Please try again.");
       }
     },
     [loading, deleteMessageById, setMessages],
