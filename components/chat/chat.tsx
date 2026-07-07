@@ -9,11 +9,18 @@ import { TypingIndicator } from "./typing-indicator";
 type Props = {
   chatId?: string;
   messages: MessageType[];
-  loading?: boolean;
+  loading: boolean;
   retrySendMessage?: (message: MessageType) => Promise<Response | undefined>;
+  handleDeleteMessage: (messageId: string) => Promise<void>;
 };
 
-const Chat = ({ chatId, messages, loading, retrySendMessage }: Props) => {
+const Chat = ({
+  chatId,
+  messages,
+  loading,
+  retrySendMessage,
+  handleDeleteMessage,
+}: Props) => {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -44,6 +51,8 @@ const Chat = ({ chatId, messages, loading, retrySendMessage }: Props) => {
               key={message.id}
               message={message}
               retrySendMessage={retrySendMessage}
+              loading={loading}
+              handleDeleteMessage={handleDeleteMessage}
             />
           ))}
         {showTypingIndicator && (

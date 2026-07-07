@@ -64,6 +64,15 @@ export const addMessagesByChatId = async (
   return addMessages;
 };
 
+export const deleteMessageById = async (messageId: string) => {
+  const deletedMessageId = await db
+    .delete(message)
+    .where(eq(message.id, messageId))
+    .returning({ id: message.id });
+
+  return deletedMessageId;
+};
+
 // Revalidation functions
 // export const revalidateMessages = async (chatId: string) => {
 //   revalidateTag(`messages-${chatId}`, "max");

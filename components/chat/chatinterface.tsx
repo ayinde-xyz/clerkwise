@@ -1,7 +1,7 @@
 "use client";
 import Chat from "./chat";
 import ChatInput from "./chatinput";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Message } from "@/drizzle/schema";
 import {
   ChatSchema,
@@ -14,6 +14,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import useModel from "@/hooks/use-model";
 import { toast } from "sonner";
 import axios from "axios";
+import { deleteMessageById } from "@/actions/newchat";
 
 type ChatInterfaceProps = {
   initialMessages?: Message[];
@@ -73,8 +74,6 @@ const ChatInterface = ({
 
       toast.loading("Sending message...");
 
-     
-
       userMessageId =
         typeof window !== "undefined" && window.crypto?.randomUUID
           ? window.crypto.randomUUID()
@@ -90,7 +89,6 @@ const ChatInterface = ({
 
       setMessages((prev) => [...prev, userMessage]);
 
-      
       setAttachedFileName(null);
 
       const addMessages = await axios.post("/api/chat", {
@@ -211,9 +209,35 @@ const ChatInterface = ({
     [sendMessage, form],
   );
 
+  const handleDeleteMessage = useCallback(
+    async (messageId: string) => {
+      if (loading) return;
+      const deletedMessageId = await deleteMessageById(messageId);
+      setMessages((prev) =>
+        prev.filter((msg) => msg.id !== deletedMessageId[0].id),
+      );
+    },
+    [loading, deleteMessageById],
+  );
+
+  const retrySendMessage = useCallback(
+    async (message: Message) => {
+      form.reset({ ...form.getValues(), prompt: message.content });
+      const response = await sendMessage(message.content);
+      return response;
+    },
+    [sendMessage, form],
+  );
+
   return (
     <>
-      <Chat chatId={chatId} messages={messages} loading={loading} />
+      <Chat
+        chatId={chatId}
+        messages={messages}
+        loading={loading}
+        retrySendMessage={retrySendMessage}
+        handleDeleteMessage={handleDeleteMessage}
+      />
       <ChatInput
         form={form}
         handleSendMessage={handleSendMessage}
