@@ -46,7 +46,7 @@ const Chat = ({
   if (!chatId)
     return (
       <div className="flex-1 overflew-y-auto ">
-        <ChatHeader />
+        <ChatHeader showHeader={showHeader} />
         <EmptyChat message={"Create a new chat to get started!"} />
       </div>
     );
