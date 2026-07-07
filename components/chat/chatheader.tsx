@@ -38,7 +38,7 @@ const ChatHeader = ({ messages, showHeader }: ChatHeaderProps) => {
       className={`w-full h-10 border-b space-x-2 border-gray-300/30  backdrop-blur-sm backdrop-contrast flex items-center sticky top-0 transition-transform duration-300 ${showHeader ? "translate-y-0" : "-translate-y-full"}`}>
       <ToggleButton />
       <ChevronRightIcon />
-      <h1 className="text-slate-800">
+      <h1 className="text-slate-800 truncate">
         {messages ? messages[0]?.content : "New Chat"}{" "}
       </h1>
     </div>

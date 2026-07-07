@@ -17,8 +17,7 @@ const ChatPage = async () => {
   }
 
   return (
-    <div className="flex flex-col overflow-hidden w-full h-screen">
-      {/* <p>Yes i am still there</p> */}
+    <div className="flex flex-col overflow-hidden w-full h-dvh relative">
       {/* Chat */}
       <ChatInterface />
     </div>

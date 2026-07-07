@@ -1,7 +1,7 @@
 "use client";
 import Chat from "./chat";
 import ChatInput from "./chatinput";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Message } from "@/drizzle/schema";
 import {
   ChatSchema,
@@ -14,17 +14,38 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import useModel from "@/hooks/use-model";
 import { toast } from "sonner";
 import axios from "axios";
-import { deleteMessageById } from "@/actions/newchat";
+import { deleteMessageById, newChat } from "@/actions/newchat";
+import { useRouter } from "next/navigation";
+import { useSession } from "@/lib/auth-client";
+
+const getApiErrorMessage = async (response: Response): Promise<string> => {
+  const fallbackMessage = `API error: ${response.status}`;
+
+  try {
+    const data = await response.json();
+    if (typeof data?.error === "string" && data.error.trim().length > 0) {
+      return data.error;
+    }
+  } catch {
+    // Ignore JSON parse errors and use fallback status text.
+  }
+
+  return fallbackMessage;
+};
 
 type ChatInterfaceProps = {
   initialMessages?: Message[];
   chatId?: string;
 };
 
+const initiatedChats = new Set<string>();
+
 const ChatInterface = ({
   initialMessages = [],
   chatId,
 }: ChatInterfaceProps) => {
+  const session = useSession();
+  const router = useRouter();
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [loading, setLoading] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
@@ -43,20 +64,7 @@ const ChatInterface = ({
     },
   });
 
-  const getApiErrorMessage = async (response: Response): Promise<string> => {
-    const fallbackMessage = `API error: ${response.status}`;
 
-    try {
-      const data = await response.json();
-      if (typeof data?.error === "string" && data.error.trim().length > 0) {
-        return data.error;
-      }
-    } catch {
-      // Ignore JSON parse errors and use fallback status text.
-    }
-
-    return fallbackMessage;
-  };
 
   const stopStream = useCallback(() => {
     abortControllerRef.current?.abort();
@@ -66,46 +74,48 @@ const ChatInterface = ({
   }, []);
 
   const sendMessage = useCallback(
-    async (prompt: string) => {
+    async (prompt: string, skipUserMessage: boolean = false) => {
       if (!chatId) return;
       let userMessageId = "";
       let assistantMessageId = "";
       try {
         setLoading(true);
 
-        toast.loading("Sending message...");
+        if (!skipUserMessage) {
+          toast.loading("Sending message...");
 
-        userMessageId =
-          typeof window !== "undefined" && window.crypto?.randomUUID
-            ? window.crypto.randomUUID()
-            : Math.random().toString(36).substring(2);
-        const userMessage = {
-          id: userMessageId,
-          chatId,
-          role: "user",
-          createdAt: new Date(),
-          content: prompt,
-          success: true,
-        };
+          userMessageId =
+            typeof window !== "undefined" && window.crypto?.randomUUID
+              ? window.crypto.randomUUID()
+              : Math.random().toString(36).substring(2);
+          const userMessage = {
+            id: userMessageId,
+            chatId,
+            role: "user",
+            createdAt: new Date(),
+            content: prompt,
+            success: true,
+          };
 
-        setMessages((prev) => [...prev, userMessage]);
+          setMessages((prev) => [...prev, userMessage]);
 
-        setAttachedFileName(null);
+          setAttachedFileName(null);
 
-        const addUserMessages = await axios.post("/api/chat", {
-          id: userMessageId,
-          chatId,
-          prompt,
-          role: "user",
-        });
+          const addUserMessages = await axios.post("/api/chat", {
+            id: userMessageId,
+            chatId,
+            prompt,
+            role: "user",
+          });
 
-        if (addUserMessages.status !== 200) {
+          if (addUserMessages.status !== 200) {
+            toast.dismiss();
+            toast.error("Failed to send message");
+            setLoading(false);
+            return;
+          }
           toast.dismiss();
-          toast.error("Failed to send message");
-          setLoading(false);
-          return;
         }
-        toast.dismiss();
 
         const response = await fetch("/api/prompt", {
           method: "POST",
@@ -205,16 +215,43 @@ const ChatInterface = ({
         setIsStreaming(false);
       }
     },
-    [chatId, isStreaming, getApiErrorMessage, setMessages],
+    [chatId, isStreaming, setMessages],
   );
 
   const handleSendMessage = useCallback(
     async (values: ChatSchemaType) => {
       form.reset({ ...values, prompt: "" });
+      if (!chatId) {
+        if (!session.data) {
+          toast.error("Please sign in to start a chat");
+          return;
+        }
+        try {
+          setLoading(true);
+          const newChatId = await newChat(session.data);
+          const tempMsgId =
+            typeof window !== "undefined" && window.crypto?.randomUUID
+              ? window.crypto.randomUUID()
+              : Math.random().toString(36).substring(2);
+          await axios.post("/api/chat", {
+            id: tempMsgId,
+            chatId: newChatId,
+            prompt: values.prompt,
+            role: "user",
+          });
+          router.push(`/chat/${newChatId}`);
+        } catch (error) {
+          console.error("Failed to start new chat:", error);
+          toast.error("Failed to start new chat. Please try again.");
+          setLoading(false);
+        }
+        return;
+      }
+
       const response = await sendMessage(values.prompt);
       return response;
     },
-    [sendMessage, form],
+    [chatId, sendMessage, form, session.data, router],
   );
 
   const handleDeleteMessage = useCallback(
@@ -241,7 +278,7 @@ const ChatInterface = ({
       if (loading) return;
       form.setValue("prompt", message);
     },
-    [form],
+    [form, loading],
   );
 
   const retrySendMessage = useCallback(
@@ -252,6 +289,18 @@ const ChatInterface = ({
     },
     [sendMessage, form],
   );
+
+  useEffect(() => {
+    if (!chatId) return;
+    if (initiatedChats.has(chatId)) return;
+
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage && lastMessage.role === "user") {
+      initiatedChats.add(chatId);
+      sendMessage(lastMessage.content, true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chatId, sendMessage]);
 
   return (
     <>
