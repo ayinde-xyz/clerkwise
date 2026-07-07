@@ -15,7 +15,7 @@ const cookieDomain: string | undefined =
     : undefined;
 
 export const auth = betterAuth({
-  appName: "Neuralis AI",
+  appName: "Clerkwise AI",
   baseURL: process.env.BETTER_AUTH_URL,
   database: drizzleAdapter(db, {
     provider: "pg", // or "mysql", "sqlite"
@@ -69,7 +69,7 @@ export const auth = betterAuth({
         to: user.email,
         subject: "Verify your Email Address",
         description:
-          "Welcome to Neuralis AI! Please verify your email address by clicking the button below.",
+          "Welcome to Clerkwiseee AI! Please verify your email address by clicking the button below.",
         link: url,
       });
     },

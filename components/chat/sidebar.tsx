@@ -21,6 +21,9 @@ import ModelSelection from "./modelselection";
 import { useSession } from "@/lib/auth-client";
 import { SignOut } from "../auth/signout";
 import { newChat } from "@/actions/newchat";
+import { archivo } from "@/app/fonts";
+import Image from "next/image";
+import Icon from "@/app/icon.svg";
 
 const fetcher = (url: string) => axios.get(url).then((res) => res.data);
 const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
@@ -41,6 +44,20 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
   return (
     <Sidebar {...props} variant="floating">
       <SidebarHeader>
+        <SidebarGroup className="items-center space-x-2">
+          <div className="flex items-center space-x-2">
+            <h1 className={`${archivo.className} text-xl font-bold `}>
+              ClerkWise
+            </h1>
+            <Image
+              src={Icon}
+              alt="ClerkWise Logo"
+              className="inline"
+              width={32}
+              height={32}
+            />
+          </div>
+        </SidebarGroup>
         <SidebarGroup>
           <SidebarGroupLabel>New Chat</SidebarGroupLabel>
           <SidebarGroupContent>

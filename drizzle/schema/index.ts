@@ -90,14 +90,14 @@ export const chat = pgTable("Chat", {
 export type Chat = InferSelectModel<typeof chat>;
 
 export const message = pgTable("Message", {
-  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  id: uuid("id").primaryKey().notNull(),
   chatId: uuid("chatId")
     .notNull()
     .references(() => chat.id, { onDelete: "cascade" }),
   role: varchar("role").notNull(),
   content: text("parts").notNull(),
-  attachments: json("attachments"),
   createdAt: timestamp("createdAt").notNull(),
+  success: boolean("success").default(true).notNull(),
 });
 
 export type Message = InferInsertModel<typeof message>;

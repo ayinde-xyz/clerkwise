@@ -27,7 +27,7 @@ const AuthLayout = ({ children }: { children: React.ReactNode }) => {
 
           <h1
             className={`text-5xl md:text-7xl font-bold bg-linear-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent ${poppins.className}`}>
-            Neuralis AI
+            Clerkwise AI
           </h1>
 
           <p className="text-lg md:text-xl text-gray-600 max-w-lg leading-relaxed">

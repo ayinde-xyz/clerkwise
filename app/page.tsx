@@ -32,7 +32,7 @@ export default async function Home() {
               "text-5xl md:text-7xl font-bold bg-linear-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent",
               font.className,
             )}>
-            Neuralis AI
+            Clerkwise AI
           </h1>
 
           <p className="text-xl md:text-2xl text-gray-600 max-w-2xl mx-auto leading-relaxed">

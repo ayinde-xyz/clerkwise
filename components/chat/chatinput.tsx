@@ -1,17 +1,9 @@
 "use client";
-import { RefObject, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Controller, useForm, UseFormReturn } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  PaperclipIcon,
-  SendIcon,
-  XIcon,
-  FileIcon,
-  SquareIcon,
-} from "lucide-react";
-import { toast } from "sonner";
+import { SendIcon, SquareIcon } from "lucide-react";
 import { Field, FieldGroup, FieldSet } from "../ui/field";
 import {
   InputGroup,
@@ -26,18 +18,29 @@ import { ChatSchemaType } from "@/schemas";
 
 type Props = {
   form: UseFormReturn<ChatSchemaType>;
-  sendMessage: (values: ChatSchemaType) => Promise<Response | undefined>;
+  handleSendMessage: (values: ChatSchemaType) => Promise<Response | undefined>;
   loading: boolean;
   isStreaming: boolean;
   stopStream: () => void;
 };
 const ChatInput = ({
   form,
-  sendMessage,
+  handleSendMessage,
   loading,
   isStreaming,
   stopStream,
 }: Props) => {
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const promptValue = form.watch("prompt");
+
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = "auto";
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    }
+  }, [promptValue]);
+
   // const fileInputRef = useRef<HTMLInputElement>(null);
 
   // const removeFile = () => {
@@ -83,11 +86,11 @@ const ChatInput = ({
 
   return (
     <form
-      onSubmit={form.handleSubmit(sendMessage)}
-      className="relative bg-transparent w-full max-w-2xl mx-auto  rounded-2xl  text-sm">
+      onSubmit={form.handleSubmit(handleSendMessage)}
+      className="absolute bottom-0 left-0 right-0 bg-transparent w-full max-w-2xl mx-auto  rounded-2xl  text-sm">
       {/* Blurring design */}
       {/* <div className="absolute -top-15 inset-x-0 h-15 bg-linear-to-t from-white via-white/50 to-transparent pointer-events-none blur-sm" /> */}
-      <FieldGroup>
+      <FieldGroup className="mx-2">
         {/* File attachment chip */}
         {/* {attachedFileName && (
           <div className="absolute -top-9 left-1 z-10">
@@ -109,18 +112,24 @@ const ChatInput = ({
           control={form.control}
           name="prompt"
           render={({ field, fieldState }) => (
-            <Field className=" max-w-2xl bg-slate-200 rounded-2xl p-3">
-              <InputGroup className="h-auto ">
+            <Field className="max-w-2xl bg-slate-200 rounded-2xl p-1">
+              <InputGroup>
                 <InputGroupTextarea
                   disabled={loading}
+                  className=" resize-none"
                   {...field}
+                  ref={(e) => {
+                    field.ref(e);
+                    textareaRef.current = e;
+                  }}
                   aria-invalid={fieldState.invalid}
                   id="block-end-input"
-                  placeholder="Ask Neuralis"
+                  placeholder="Ask Clerkwise"
                 />
                 <InputGroupAddon align="block-end">
-                  <InputGroupText className="tabular-nums">
-                    {field.value.length}/100 characters
+                  <InputGroupText
+                    className={`tabular-nums ${(field.value ?? "").trim().length > 90 ? "text-destructive" : ""}`}>
+                    {(field.value ?? "").trim().length}/100 chars
                   </InputGroupText>
                 </InputGroupAddon>
               </InputGroup>

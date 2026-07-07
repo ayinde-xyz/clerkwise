@@ -35,33 +35,43 @@ export const getMessagesByChatId = async (chatId: string) => {
   return await getMessages();
 };
 
-export const addMessagesByChatId = async (
-  chatId: string,
-  prompt: string,
-  role: "user" | "assistant",
-) => {
-  const checkMessageWithId = await db.query.message.findMany({
-    where: (message, { eq }) => eq(message.chatId, chatId),
-  });
+// export const addMessagesByChatId = async (
+//   chatId: string,
+//   prompt: string,
+//   role: "user" | "model",
+// ) => {
+//   const checkMessageWithId = await db.query.message.findMany({
+//     where: (message, { eq }) => eq(message.chatId, chatId),
+//   });
 
-  if (!checkMessageWithId.length) {
-    await db.update(chat).set({ title: prompt }).where(eq(chat.id, chatId));
-  }
+//   if (!checkMessageWithId.length) {
+//     await db.update(chat).set({ title: prompt }).where(eq(chat.id, chatId));
+//   }
 
-  const addMessages = await db
-    .insert(message)
-    .values({
-      content: prompt,
-      chatId,
-      attachments: [],
-      role,
-      createdAt: new Date(),
-    })
-    .returning({
-      id: message.id,
-    });
+//   const addMessages = await db
+//     .insert(message)
+//     .values({
+//       id: crypto.randomUUID(),
+//       chatId: chatId,
+//       content: prompt,
+//       attachments: [],
+//       role,
+//       createdAt: new Date(),
+//     })
+//     .returning({
+//       id: message.id,
+//     });
 
-  return addMessages;
+//   return addMessages;
+// };
+
+export const deleteMessageById = async (messageId: string) => {
+  const deletedMessageId = await db
+    .delete(message)
+    .where(eq(message.id, messageId))
+    .returning({ id: message.id });
+
+  return deletedMessageId;
 };
 
 // Revalidation functions

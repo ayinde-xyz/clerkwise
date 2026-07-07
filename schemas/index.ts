@@ -30,6 +30,7 @@ export const ResetPasswordSchema = z
 export const ChatSchema = z.object({
   prompt: z
     .string()
+    .trim()
     .min(1, { message: "Please enter a valid prompt" })
     .max(100, "Description must be at most 100 characters."),
   // chatId: z.string().min(1, { message: "Please enter a valid chat ID" }),

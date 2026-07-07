@@ -20,7 +20,7 @@ const useModel = create<ModelState>()(
       reset: () => set({ model: DEFAULT_MODEL }),
     }),
     {
-      name: "neuralis-model-storage", // key in localStorage (optional)
+      name: "clerkwise-model-storage", // key in localStorage (optional)
       storage: createJSONStorage(() => localStorage),
     },
   ),
