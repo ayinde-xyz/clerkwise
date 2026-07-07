@@ -4,7 +4,7 @@ import "./globals.css";
 const robota = Roboto({ style: "normal", weight: "400" });
 
 export const metadata: Metadata = {
-  title: "Neuralis AI",
+  title: "Clerkwise AI",
   description: "Built using Next.js and Firebase Genkit",
 };
 

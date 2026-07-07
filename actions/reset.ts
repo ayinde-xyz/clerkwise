@@ -22,7 +22,7 @@ export async function sendEmailAction({
   const mailOptions = {
     from: process.env.NODEMAILER_USER,
     to,
-    subject: `Neuralis AI - ${subject}`,
+    subject: `Clerkwise AI - ${subject}`,
     html: emailHtml,
   };
 

@@ -3,7 +3,7 @@ import { EmptyChat } from "@/components/chat/emptychat";
 import { cn } from "@/lib/utils";
 import ChatHeader from "./chatheader";
 import { Message as MessageType } from "@/drizzle/schema";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { TypingIndicator } from "./typing-indicator";
 
 type Props = {
@@ -24,6 +24,20 @@ const Chat = ({
   handleEditMessage,
 }: Props) => {
   const bottomRef = useRef<HTMLDivElement>(null);
+  const [showHeader, setShowHeader] = useState(true);
+  const lastScrollY = useRef(0);
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const currentScrollY = e.currentTarget.scrollTop;
+    if (currentScrollY === 0) {
+      setShowHeader(true);
+    } else if (currentScrollY < lastScrollY.current) {
+      setShowHeader(true);
+    } else if (currentScrollY > lastScrollY.current) {
+      setShowHeader(false);
+    }
+    lastScrollY.current = currentScrollY;
+  };
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -42,8 +56,10 @@ const Chat = ({
   const showTypingIndicator = loading && isLastMessageFromUser;
 
   return (
-    <div className="flex-1 overflow-y-auto overflow-x-hidden pb-26 relative">
-      <ChatHeader messages={messages} />
+    <div
+      onScroll={handleScroll}
+      className="flex-1 overflow-y-auto overflow-x-hidden pb-26 relative">
+      <ChatHeader messages={messages} showHeader={showHeader} />
 
       {!messages?.length && <EmptyChat />}
       <div className={cn("flex flex-col", !messages?.length && "hidden")}>

@@ -31,7 +31,7 @@ export const Email = ({ description, link, subject }: EmailProps) => {
             <div className="p-8 text-center">
               <div className="text-4xl mb-2">🤖</div>
               <Heading className="text-black text-2xl font-bold m-0">
-                Neuralis AI
+                Clerkwise AI
               </Heading>
             </div>
 

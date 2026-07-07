@@ -65,142 +65,148 @@ const ChatInterface = ({
     setIsStreaming(false);
   }, []);
 
-  const sendMessage = async (prompt: string) => {
-    if (!chatId) return;
-    let userMessageId = "";
-    let assistantMessageId = "";
-    try {
-      setLoading(true);
+  const sendMessage = useCallback(
+    async (prompt: string) => {
+      if (!chatId) return;
+      let userMessageId = "";
+      let assistantMessageId = "";
+      try {
+        setLoading(true);
 
-      toast.loading("Sending message...");
+        toast.loading("Sending message...");
 
-      userMessageId =
-        typeof window !== "undefined" && window.crypto?.randomUUID
-          ? window.crypto.randomUUID()
-          : Math.random().toString(36).substring(2);
-      const userMessage = {
-        id: userMessageId,
-        chatId,
-        role: "user",
-        createdAt: new Date(),
-        content: prompt,
-        success: true,
-      };
+        userMessageId =
+          typeof window !== "undefined" && window.crypto?.randomUUID
+            ? window.crypto.randomUUID()
+            : Math.random().toString(36).substring(2);
+        const userMessage = {
+          id: userMessageId,
+          chatId,
+          role: "user",
+          createdAt: new Date(),
+          content: prompt,
+          success: true,
+        };
 
-      setMessages((prev) => [...prev, userMessage]);
+        setMessages((prev) => [...prev, userMessage]);
 
-      setAttachedFileName(null);
+        setAttachedFileName(null);
 
-      const addUserMessages = await axios.post("/api/chat", {
-        id: userMessageId,
-        chatId,
-        prompt,
-        role: "user",
-      });
-
-      if (addUserMessages.status !== 200) {
-        toast.dismiss();
-        toast.error("Failed to send message");
-        setLoading(false);
-        return;
-      }
-      toast.dismiss();
-
-      const response = await fetch("/api/prompt", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+        const addUserMessages = await axios.post("/api/chat", {
+          id: userMessageId,
+          chatId,
           prompt,
-        }),
-      });
+          role: "user",
+        });
 
-      if (!response.ok) {
-        const errorMessage = await getApiErrorMessage(response);
-        throw new Error(errorMessage);
-      }
+        if (addUserMessages.status !== 200) {
+          toast.dismiss();
+          toast.error("Failed to send message");
+          setLoading(false);
+          return;
+        }
+        toast.dismiss();
 
-      if (!response.body) {
-        throw new Error("No response body");
-      }
+        const response = await fetch("/api/prompt", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            prompt,
+          }),
+        });
 
-      assistantMessageId =
-        typeof window !== "undefined" && window.crypto?.randomUUID
-          ? window.crypto.randomUUID()
-          : Math.random().toString(36).substring(2);
+        if (!response.ok) {
+          const errorMessage = await getApiErrorMessage(response);
+          throw new Error(errorMessage);
+        }
 
-      setMessages((prev) => [
-        ...prev,
-        {
+        if (!response.body) {
+          throw new Error("No response body");
+        }
+
+        assistantMessageId =
+          typeof window !== "undefined" && window.crypto?.randomUUID
+            ? window.crypto.randomUUID()
+            : Math.random().toString(36).substring(2);
+
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: assistantMessageId,
+            chatId,
+            role: "model",
+            content: "",
+            createdAt: new Date(),
+          },
+        ]);
+
+        const controller = new AbortController();
+        abortControllerRef.current = controller;
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let contentText = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunkText = decoder.decode(value, { stream: true });
+          if (!isStreaming) setIsStreaming(true);
+          contentText += chunkText;
+
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === assistantMessageId
+                ? { ...msg, content: contentText }
+                : msg,
+            ),
+          );
+        }
+
+        await axios.post("/api/chat", {
           id: assistantMessageId,
           chatId,
+          prompt: contentText,
           role: "model",
-          content: "",
-          createdAt: new Date(),
-        },
-      ]);
+        });
 
-      const controller = new AbortController();
-      abortControllerRef.current = controller;
+        return response;
+      } catch (error: any) {
+        console.error(error);
+        if (error.name !== "AbortError") {
+          const errorMessage =
+            typeof error?.message === "string" &&
+            error.message.trim().length > 0
+              ? error.message
+              : "Failed to send message. Please try again.";
+          toast.error(errorMessage);
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let contentText = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunkText = decoder.decode(value, { stream: true });
-        if (!isStreaming) setIsStreaming(true);
-        contentText += chunkText;
-
-        setMessages((prev) =>
-          prev.map((msg) =>
-            msg.id === assistantMessageId
-              ? { ...msg, content: contentText }
-              : msg,
-          ),
-        );
-      }
-
-      await axios.post("/api/chat", {
-        id: assistantMessageId,
-        chatId,
-        prompt: contentText,
-        role: "model",
-      });
-
-      return response;
-    } catch (error: any) {
-      console.error(error);
-      if (error.name !== "AbortError") {
-        const errorMessage =
-          typeof error?.message === "string" && error.message.trim().length > 0
-            ? error.message
-            : "Failed to send message. Please try again.";
-        toast.error(errorMessage);
-
-        setMessages((prev) =>
-          prev
-            .map((m) => (m.id === userMessageId ? { ...m, success: false } : m))
-            .filter((m) => m.id !== assistantMessageId),
-        );
-      } else {
-        setMessages(
-          (prev) =>
+          setMessages((prev) =>
             prev
               .map((m) =>
-                m.id === assistantMessageId && m.content === "" ? null : m,
+                m.id === userMessageId ? { ...m, success: false } : m,
               )
-              .filter(Boolean) as Message[],
-        );
+              .filter((m) => m.id !== assistantMessageId),
+          );
+        } else {
+          setMessages(
+            (prev) =>
+              prev
+                .map((m) =>
+                  m.id === assistantMessageId && m.content === "" ? null : m,
+                )
+                .filter(Boolean) as Message[],
+          );
+        }
+      } finally {
+        abortControllerRef.current = null;
+        setLoading(false);
+        setIsStreaming(false);
       }
-    } finally {
-      abortControllerRef.current = null;
-      setLoading(false);
-      setIsStreaming(false);
-    }
-  };
+    },
+    [chatId, isStreaming, getApiErrorMessage, setMessages],
+  );
 
   const handleSendMessage = useCallback(
     async (values: ChatSchemaType) => {

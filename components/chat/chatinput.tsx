@@ -124,7 +124,7 @@ const ChatInput = ({
                   }}
                   aria-invalid={fieldState.invalid}
                   id="block-end-input"
-                  placeholder="Ask Clerksmart"
+                  placeholder="Ask Clerkwise"
                 />
                 <InputGroupAddon align="block-end">
                   <InputGroupText
