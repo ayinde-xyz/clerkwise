@@ -1,17 +1,9 @@
 "use client";
-import { RefObject, useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Controller, useForm, UseFormReturn } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  PaperclipIcon,
-  SendIcon,
-  XIcon,
-  FileIcon,
-  SquareIcon,
-} from "lucide-react";
-import { toast } from "sonner";
+import { SendIcon, SquareIcon } from "lucide-react";
 import { Field, FieldGroup, FieldSet } from "../ui/field";
 import {
   InputGroup,
@@ -98,7 +90,7 @@ const ChatInput = ({
       className="relative bg-transparent w-full max-w-2xl mx-auto  rounded-2xl  text-sm">
       {/* Blurring design */}
       {/* <div className="absolute -top-15 inset-x-0 h-15 bg-linear-to-t from-white via-white/50 to-transparent pointer-events-none blur-sm" /> */}
-      <FieldGroup>
+      <FieldGroup className="mx-2">
         {/* File attachment chip */}
         {/* {attachedFileName && (
           <div className="absolute -top-9 left-1 z-10">

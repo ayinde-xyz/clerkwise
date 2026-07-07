@@ -11,7 +11,7 @@ type Props = {
   messages: MessageType[];
   loading: boolean;
   retrySendMessage?: (message: MessageType) => Promise<Response | undefined>;
-  handleDeleteMessage: (messageId: string) => Promise<void>;
+  handleDeleteMessage?: (messageId: string) => Promise<void>;
 };
 
 const Chat = ({

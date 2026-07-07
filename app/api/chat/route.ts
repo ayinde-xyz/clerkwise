@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    const { chatId, prompt, role } = body;
+    const { chatId, prompt, role, id } = body;
 
     const checkMessageWithId = await db.query.message.findMany({
       where: (message, { eq }) => eq(message.chatId, chatId),
@@ -52,9 +52,9 @@ export async function POST(request: NextRequest) {
     await db
       .insert(message)
       .values({
+        id,
         content: prompt,
         chatId,
-        attachments: [],
         role,
         createdAt: new Date(),
       })

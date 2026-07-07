@@ -1,4 +1,4 @@
-import { RotateCwIcon } from "lucide-react";
+import { RotateCwIcon, TrashIcon } from "lucide-react";
 import { Button } from "../ui/button";
 import CopyButton from "./copybutton";
 import { Message as MessageType } from "@/drizzle/schema";
@@ -7,7 +7,7 @@ type Props = {
   message: MessageType;
   retrySendMessage?: (message: MessageType) => Promise<Response | undefined>;
   loading: boolean;
-  handleDeleteMessage: (messageId: string) => Promise<void>;
+  handleDeleteMessage?: (messageId: string) => Promise<void>;
 };
 
 const Message = ({
@@ -64,7 +64,7 @@ const Message = ({
             </div>
           )}
           <div>
-            {isModel && <CopyButton text={message.content} />}
+            <CopyButton text={message.content} />
             {!isModel && !message.success && (
               <Button
                 variant={"ghost"}
@@ -78,7 +78,9 @@ const Message = ({
               variant={"ghost"}
               size={"icon"}
               disabled={loading}
-              onClick={() => handleDeleteMessage(message?.id)}></Button>
+              onClick={() => handleDeleteMessage?.(message.id)}>
+              <TrashIcon />
+            </Button>
           </div>
         </div>
       </div>

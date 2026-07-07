@@ -91,13 +91,14 @@ const ChatInterface = ({
 
       setAttachedFileName(null);
 
-      const addMessages = await axios.post("/api/chat", {
+      const addUserMessages = await axios.post("/api/chat", {
+        id: userMessageId,
         chatId,
         prompt,
         role: "user",
       });
 
-      if (addMessages.status !== 200) {
+      if (addUserMessages.status !== 200) {
         toast.dismiss();
         toast.error("Failed to send message");
         setLoading(false);
@@ -163,6 +164,7 @@ const ChatInterface = ({
       }
 
       await axios.post("/api/chat", {
+        id: assistantMessageId,
         chatId,
         prompt: contentText,
         role: "model",
@@ -211,13 +213,19 @@ const ChatInterface = ({
 
   const handleDeleteMessage = useCallback(
     async (messageId: string) => {
+      console.log("Deleting message with Id", messageId);
       if (loading) return;
-      const deletedMessageId = await deleteMessageById(messageId);
-      setMessages((prev) =>
-        prev.filter((msg) => msg.id !== deletedMessageId[0].id),
-      );
+      try {
+        const deletedMessageId = await deleteMessageById(messageId);
+        const targetId = deletedMessageId?.[0]?.id || messageId;
+        setMessages((prev) => prev.filter((msg) => msg.id !== targetId));
+      } catch (error) {
+        console.error("Failed to delete message:", error);
+        // Fallback: remove from UI anyway
+        setMessages((prev) => prev.filter((msg) => msg.id !== messageId));
+      }
     },
-    [loading, deleteMessageById],
+    [loading, deleteMessageById, setMessages],
   );
 
   const retrySendMessage = useCallback(
