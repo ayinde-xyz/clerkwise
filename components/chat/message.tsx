@@ -8,7 +8,7 @@ type Props = {
   retrySendMessage?: (message: MessageType) => Promise<Response | undefined>;
   loading: boolean;
   handleDeleteMessage?: (messageId: string) => Promise<void>;
-  handleEditMessage: (message: string) => Promise<void>;
+  handleEditMessage: (values: { prompt: string; category?: MessageType["category"] }) => Promise<void>;
 };
 
 const Message = ({
@@ -94,7 +94,7 @@ const Message = ({
                 size={"icon"}
                 className="focus:translate-y-1 focus:scale-95 transition-transform"
                 disabled={loading}
-                onClick={() => handleEditMessage?.(message.content)}>
+                onClick={() => handleEditMessage?.({ prompt: message.content, category: message.category || undefined })}>
                 <EditIcon />
               </Button>
             )}

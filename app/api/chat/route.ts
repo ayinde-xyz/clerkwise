@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    const { chatId, prompt, role, id } = body;
+    const { chatId, prompt, role, id, category } = body;
 
     const checkMessageWithId = await db.query.message.findMany({
       where: (message, { eq }) => eq(message.chatId, chatId),
@@ -56,6 +56,7 @@ export async function POST(request: NextRequest) {
         content: prompt,
         chatId,
         role,
+        category: category || "internal_medicine",
         createdAt: new Date(),
       })
       .returning({

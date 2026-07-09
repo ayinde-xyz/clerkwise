@@ -12,7 +12,7 @@ type Props = {
   loading: boolean;
   retrySendMessage?: (message: MessageType) => Promise<Response | undefined>;
   handleDeleteMessage?: (messageId: string) => Promise<void>;
-  handleEditMessage: (message: string) => Promise<void>;
+  handleEditMessage: (values: { prompt: string; category?: MessageType["category"] }) => Promise<void>;
 };
 
 const Chat = ({

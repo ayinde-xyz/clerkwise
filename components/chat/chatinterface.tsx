@@ -42,6 +42,7 @@ const ChatInterface = ({
   init,
 }: ChatInterfaceProps) => {
   const session = useSession();
+
   const router = useRouter();
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [loading, setLoading] = useState(false);
@@ -67,7 +68,10 @@ const ChatInterface = ({
   }, []);
 
   const sendMessage = useCallback(
-    async (prompt: string, skipUserMessage: boolean = false) => {
+    async (
+      values: { prompt: string; category?: Message["category"] },
+      skipUserMessage: boolean = false,
+    ) => {
       if (!chatId) return;
       let userMessageId = "";
       let assistantMessageId = "";
@@ -85,9 +89,10 @@ const ChatInterface = ({
             id: userMessageId,
             chatId,
             role: "user",
-
             createdAt: new Date(),
-            content: prompt,
+            content: values.prompt,
+            category: (values.category ||
+              "internal_medicine") as Message["category"],
             success: true,
           };
 
@@ -96,8 +101,9 @@ const ChatInterface = ({
           const addUserMessages = await axios.post("/api/chat", {
             id: userMessageId,
             chatId,
-            prompt,
+            prompt: values.prompt,
             role: "user",
+            category: values.category || "internal_medicine",
           });
 
           if (addUserMessages.status !== 200) {
@@ -113,7 +119,8 @@ const ChatInterface = ({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            prompt,
+            prompt: values.prompt,
+            category: values.category || "internal_medicine",
           }),
         });
 
@@ -138,6 +145,8 @@ const ChatInterface = ({
             chatId,
             role: "model",
             content: "",
+            category: (values.category ||
+              "internal_medicine") as Message["category"],
             createdAt: new Date(),
           },
         ]);
@@ -171,6 +180,7 @@ const ChatInterface = ({
           chatId,
           prompt: contentText,
           role: "model",
+          category: values.category || "internal_medicine",
         });
 
         return response;
@@ -231,6 +241,7 @@ const ChatInterface = ({
             chatId: newChatId,
             prompt: values.prompt,
             role: "user",
+            category: values.category || "internal_medicine",
           });
           router.push(`/chat/${newChatId}?init=true`);
         } catch (error) {
@@ -240,7 +251,10 @@ const ChatInterface = ({
         }
       }
 
-      const response = await sendMessage(values.prompt);
+      const response = await sendMessage({
+        prompt: values.prompt,
+        category: values.category,
+      });
       return response;
     },
     [chatId, sendMessage, form, session.data, router],
@@ -266,17 +280,27 @@ const ChatInterface = ({
   );
 
   const handleEditMessage = useCallback(
-    async (message: string) => {
+    async (values: { prompt: string; category?: Message["category"] }) => {
       if (loading) return;
-      form.setValue("prompt", message);
+      form.setValue("prompt", values.prompt);
+      if (values.category) {
+        form.setValue("category", values.category);
+      }
     },
     [form, loading],
   );
 
   const retrySendMessage = useCallback(
     async (message: Message) => {
-      form.reset({ ...form.getValues(), prompt: message.content });
-      const response = await sendMessage(message.content);
+      form.reset({
+        ...form.getValues(),
+        prompt: message.content,
+        category: message.category || "internal_medicine",
+      });
+      const response = await sendMessage({
+        prompt: message.content,
+        category: message.category || undefined,
+      });
       return response;
     },
     [sendMessage, form],
@@ -289,7 +313,13 @@ const ChatInterface = ({
     const lastMessage = messages[messages.length - 1];
     if (lastMessage && lastMessage.role === "user" && messages.length === 1) {
       initiatedChats.add(chatId);
-      sendMessage(lastMessage.content, true);
+      sendMessage(
+        {
+          prompt: lastMessage.content,
+          category: lastMessage.category || undefined,
+        },
+        true,
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chatId, sendMessage, init]);
