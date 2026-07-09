@@ -69,7 +69,7 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
         <SidebarGroup>
           <SidebarGroupLabel>Select a Model</SidebarGroupLabel>
           <SidebarGroupContent>
-            <ModelSelection isSidebar />
+            <ModelSelection />
           </SidebarGroupContent>
         </SidebarGroup>
         <SidebarGroup>

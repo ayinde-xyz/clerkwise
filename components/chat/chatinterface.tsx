@@ -55,7 +55,6 @@ const ChatInterface = ({
     resolver: zodResolver(ChatSchema),
     defaultValues: {
       prompt: "",
-      model: store.model,
       category: "internal_medicine",
     },
   });

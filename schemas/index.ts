@@ -42,18 +42,17 @@ export const ChatSchema = z.object({
   ]),
   // chatId: z.string().min(1, { message: "Please enter a valid chat ID" }),
   // model: z.string().min(1, { message: "Please enter a valid model" }),
-  model: z.enum([
-    "gemini-3.1-pro-preview",
-    "gemini-3.1-flash-lite-preview",
-    "gemini-2.5-flash",
-    "gemini-2.5-flash-lite",
-    "gemini-2.5-pro",
-  ]),
 });
+
+const ModelSchema = z.enum([
+  "gpt-5.5-2026-04-23",
+  "claude-sonnet-5",
+  "gemini-3-flash-preview",
+]);
 
 export type SignupSchemaType = z.infer<typeof SignupSchema>;
 export type LoginSchemaType = z.infer<typeof LoginSchema>;
 export type ResetSchemaType = z.infer<typeof ResetSchema>;
 export type ResetPasswordSchemaType = z.infer<typeof ResetPasswordSchema>;
-export type ModelType = z.infer<typeof ChatSchema.shape.model>;
+export type ModelType = z.infer<typeof ModelSchema>;
 export type ChatSchemaType = z.infer<typeof ChatSchema>;
