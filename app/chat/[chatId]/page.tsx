@@ -9,13 +9,15 @@ type ChatPageProps = {
   params: Promise<{
     chatId: string;
   }>;
+  searchParams: Promise<{ init?: boolean }>;
 };
 
-const ChatPage = async ({ params }: ChatPageProps) => {
+const ChatPage = async ({ params, searchParams }: ChatPageProps) => {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
   const { chatId } = await params;
+  const { init } = await searchParams;
 
   const messages = await getMessagesByChatId(chatId);
 
@@ -27,7 +29,7 @@ const ChatPage = async ({ params }: ChatPageProps) => {
     <div className="flex flex-col overflow-hidden w-full h-dvh relative">
       {/* <p>Yes i am still there</p> */}
       {/* Chat */}
-      <ChatInterface initialMessages={messages} chatId={chatId} />
+      <ChatInterface initialMessages={messages} chatId={chatId} init={init} />
     </div>
   );
 };

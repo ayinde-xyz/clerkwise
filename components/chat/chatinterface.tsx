@@ -3,19 +3,14 @@ import Chat from "./chat";
 import ChatInput from "./chatinput";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Message } from "@/drizzle/schema";
-import {
-  ChatSchema,
-  ChatSchemaType,
-  FileSchema,
-  FileSchemaType,
-} from "@/schemas";
+import { ChatSchema, ChatSchemaType } from "@/schemas";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import useModel from "@/hooks/use-model";
 import { toast } from "sonner";
 import axios from "axios";
 import { deleteMessageById, newChat } from "@/actions/newchat";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 
 const getApiErrorMessage = async (response: Response): Promise<string> => {
@@ -36,6 +31,7 @@ const getApiErrorMessage = async (response: Response): Promise<string> => {
 type ChatInterfaceProps = {
   initialMessages?: Message[];
   chatId?: string;
+  init?: boolean;
 };
 
 const initiatedChats = new Set<string>();
@@ -43,17 +39,17 @@ const initiatedChats = new Set<string>();
 const ChatInterface = ({
   initialMessages = [],
   chatId,
+  init,
 }: ChatInterfaceProps) => {
   const session = useSession();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [loading, setLoading] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
+
   const store = useModel();
-  const [attachedFileName, setAttachedFileName] = useState<string | null>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<ChatSchemaType>({
     resolver: zodResolver(ChatSchema),
@@ -63,8 +59,6 @@ const ChatInterface = ({
       file: undefined,
     },
   });
-
-
 
   const stopStream = useCallback(() => {
     abortControllerRef.current?.abort();
@@ -98,8 +92,6 @@ const ChatInterface = ({
           };
 
           setMessages((prev) => [...prev, userMessage]);
-
-          setAttachedFileName(null);
 
           const addUserMessages = await axios.post("/api/chat", {
             id: userMessageId,
@@ -224,6 +216,7 @@ const ChatInterface = ({
       if (!chatId) {
         if (!session.data) {
           toast.error("Please sign in to start a chat");
+          router.push("/auth/signup");
           return;
         }
         try {
@@ -239,13 +232,12 @@ const ChatInterface = ({
             prompt: values.prompt,
             role: "user",
           });
-          router.push(`/chat/${newChatId}`);
+          router.push(`/chat/${newChatId}?init=true`);
         } catch (error) {
           console.error("Failed to start new chat:", error);
           toast.error("Failed to start new chat. Please try again.");
           setLoading(false);
         }
-        return;
       }
 
       const response = await sendMessage(values.prompt);
@@ -291,16 +283,16 @@ const ChatInterface = ({
   );
 
   useEffect(() => {
-    if (!chatId) return;
+    if (!chatId || !init) return;
     if (initiatedChats.has(chatId)) return;
 
     const lastMessage = messages[messages.length - 1];
-    if (lastMessage && lastMessage.role === "user") {
+    if (lastMessage && lastMessage.role === "user" && messages.length === 1) {
       initiatedChats.add(chatId);
       sendMessage(lastMessage.content, true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chatId, sendMessage]);
+  }, [chatId, sendMessage, init]);
 
   return (
     <>
