@@ -33,14 +33,15 @@ export const ChatSchema = z.object({
     .trim()
     .min(1, { message: "Please enter a valid prompt" })
     .max(100, "Description must be at most 100 characters."),
+
+  category: z.enum([
+    "internal_medicine",
+    "surgery",
+    "obstetrics_gynecology",
+    "pediatrics",
+  ]),
   // chatId: z.string().min(1, { message: "Please enter a valid chat ID" }),
   // model: z.string().min(1, { message: "Please enter a valid model" }),
-  file: z
-    .custom<GenAIFile>()
-    .refine((files) => files && Number(files.sizeBytes) < 7000000, {
-      message: "Your file must be less than 7MB",
-    })
-    .optional(),
   model: z.enum([
     "gemini-3.1-pro-preview",
     "gemini-3.1-flash-lite-preview",
@@ -48,23 +49,7 @@ export const ChatSchema = z.object({
     "gemini-2.5-flash-lite",
     "gemini-2.5-pro",
   ]),
-
-  // file: z.instanceof(FileMetadataResponse).optional(),
-  // session: z.object({
-  //   user: z.object({
-  //     email: z.string().email({ message: "Please enter a valid email" }),
-  //     name: z.string().min(1, { message: "Please enter a valid name" }),
-  //     image: z.string().optional(),
-  //   }),
-  // }),
 });
-
-export const FileSchema = z
-  .instanceof(File)
-  .refine((files) => files && files.size < 7000000, {
-    message: "Your file must be less than 7MB",
-  })
-  .optional();
 
 export type SignupSchemaType = z.infer<typeof SignupSchema>;
 export type LoginSchemaType = z.infer<typeof LoginSchema>;
@@ -72,4 +57,3 @@ export type ResetSchemaType = z.infer<typeof ResetSchema>;
 export type ResetPasswordSchemaType = z.infer<typeof ResetPasswordSchema>;
 export type ModelType = z.infer<typeof ChatSchema.shape.model>;
 export type ChatSchemaType = z.infer<typeof ChatSchema>;
-export type FileSchemaType = z.infer<typeof FileSchema>;

@@ -42,7 +42,6 @@ const ChatInterface = ({
   init,
 }: ChatInterfaceProps) => {
   const session = useSession();
-  const searchParams = useSearchParams();
   const router = useRouter();
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [loading, setLoading] = useState(false);
@@ -56,7 +55,7 @@ const ChatInterface = ({
     defaultValues: {
       prompt: "",
       model: store.model,
-      file: undefined,
+      category: "internal_medicine",
     },
   });
 
@@ -86,6 +85,7 @@ const ChatInterface = ({
             id: userMessageId,
             chatId,
             role: "user",
+
             createdAt: new Date(),
             content: prompt,
             success: true,
