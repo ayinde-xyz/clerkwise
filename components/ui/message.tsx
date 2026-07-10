@@ -23,6 +23,7 @@ function Message({
       data-align={align}
       className={cn(
         "group/message relative flex w-full min-w-0 gap-2 text-sm data-[align=end]:flex-row-reverse",
+        "data-[align=end]:[&_[data-slot=bubble]]:max-w-[95%] md:data-[align=end]:[&_[data-slot=bubble]]:max-w-[80%] data-[align=end]:[&_[data-slot=message-content]]:max-w-[95%] md:data-[align=end]:[&_[data-slot=message-content]]:max-w-[85%]",
         className,
       )}
       {...props}
