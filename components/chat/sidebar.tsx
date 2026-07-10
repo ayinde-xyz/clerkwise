@@ -64,35 +64,29 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
             <NewChat create={createNewChat} />
           </SidebarGroupContent>
         </SidebarGroup>
-      </SidebarHeader>
-      <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Select a Model</SidebarGroupLabel>
           <SidebarGroupContent>
             <ModelSelection />
           </SidebarGroupContent>
         </SidebarGroup>
+      </SidebarHeader>
+      <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Chats</SidebarGroupLabel>
           <SidebarGroupContent>
-            <div className="flex-1">
-              <div className="flex flex-col space-y-2 my-2">
-                {isLoading && (
-                  <div className="animate-pulse text-center flex flex-col space-y-2 text-white">
-                    <Skeleton className="h-10 w-full" />
-                    <Skeleton className="h-10 w-full" />
-                    <Skeleton className="h-10 w-full" />
-                  </div>
-                )}
-                {chats?.map((chat) => (
-                  <SidebarMenu key={chat.id}>
-                    <SidebarMenuButton asChild>
-                      <ChatRow chat={chat} error={error} />
-                    </SidebarMenuButton>
-                  </SidebarMenu>
-                ))}
-              </div>
-            </div>
+            <SidebarMenu>
+              {isLoading && (
+                <div className="animate-pulse text-center flex flex-col space-y-2 text-white">
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
+              )}
+              {chats?.map((chat) => (
+                <ChatRow key={chat.id} chat={chat} error={error} />
+              ))}
+            </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
