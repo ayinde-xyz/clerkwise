@@ -3,19 +3,14 @@ import Chat from "./chat";
 import ChatInput from "./chatinput";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Message } from "@/drizzle/schema";
-import {
-  ChatSchema,
-  ChatSchemaType,
-  FileSchema,
-  FileSchemaType,
-} from "@/schemas";
+import { ChatSchema, ChatSchemaType } from "@/schemas";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import useModel from "@/hooks/use-model";
 import { toast } from "sonner";
 import axios from "axios";
 import { deleteMessageById, newChat } from "@/actions/newchat";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 
 const getApiErrorMessage = async (response: Response): Promise<string> => {
@@ -36,6 +31,7 @@ const getApiErrorMessage = async (response: Response): Promise<string> => {
 type ChatInterfaceProps = {
   initialMessages?: Message[];
   chatId?: string;
+  init?: boolean;
 };
 
 const initiatedChats = new Set<string>();
@@ -43,28 +39,25 @@ const initiatedChats = new Set<string>();
 const ChatInterface = ({
   initialMessages = [],
   chatId,
+  init,
 }: ChatInterfaceProps) => {
   const session = useSession();
+
   const router = useRouter();
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [loading, setLoading] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
+
   const store = useModel();
-  const [attachedFileName, setAttachedFileName] = useState<string | null>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<ChatSchemaType>({
     resolver: zodResolver(ChatSchema),
     defaultValues: {
       prompt: "",
-      model: store.model,
-      file: undefined,
+      category: "internal_medicine",
     },
   });
-
-
 
   const stopStream = useCallback(() => {
     abortControllerRef.current?.abort();
@@ -74,7 +67,10 @@ const ChatInterface = ({
   }, []);
 
   const sendMessage = useCallback(
-    async (prompt: string, skipUserMessage: boolean = false) => {
+    async (
+      values: { prompt: string; category?: Message["category"] },
+      skipUserMessage: boolean = false,
+    ) => {
       if (!chatId) return;
       let userMessageId = "";
       let assistantMessageId = "";
@@ -93,19 +89,20 @@ const ChatInterface = ({
             chatId,
             role: "user",
             createdAt: new Date(),
-            content: prompt,
+            content: values.prompt,
+            category: (values.category ||
+              "internal_medicine") as Message["category"],
             success: true,
           };
 
           setMessages((prev) => [...prev, userMessage]);
 
-          setAttachedFileName(null);
-
           const addUserMessages = await axios.post("/api/chat", {
             id: userMessageId,
             chatId,
-            prompt,
+            prompt: values.prompt,
             role: "user",
+            category: values.category || "internal_medicine",
           });
 
           if (addUserMessages.status !== 200) {
@@ -121,7 +118,8 @@ const ChatInterface = ({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            prompt,
+            prompt: values.prompt,
+            category: values.category || "internal_medicine",
           }),
         });
 
@@ -146,6 +144,8 @@ const ChatInterface = ({
             chatId,
             role: "model",
             content: "",
+            category: (values.category ||
+              "internal_medicine") as Message["category"],
             createdAt: new Date(),
           },
         ]);
@@ -179,6 +179,7 @@ const ChatInterface = ({
           chatId,
           prompt: contentText,
           role: "model",
+          category: values.category || "internal_medicine",
         });
 
         return response;
@@ -224,6 +225,7 @@ const ChatInterface = ({
       if (!chatId) {
         if (!session.data) {
           toast.error("Please sign in to start a chat");
+          router.push("/auth/signup");
           return;
         }
         try {
@@ -238,17 +240,20 @@ const ChatInterface = ({
             chatId: newChatId,
             prompt: values.prompt,
             role: "user",
+            category: values.category || "internal_medicine",
           });
-          router.push(`/chat/${newChatId}`);
+          router.push(`/chat/${newChatId}?init=true`);
         } catch (error) {
           console.error("Failed to start new chat:", error);
           toast.error("Failed to start new chat. Please try again.");
           setLoading(false);
         }
-        return;
       }
 
-      const response = await sendMessage(values.prompt);
+      const response = await sendMessage({
+        prompt: values.prompt,
+        category: values.category,
+      });
       return response;
     },
     [chatId, sendMessage, form, session.data, router],
@@ -274,33 +279,49 @@ const ChatInterface = ({
   );
 
   const handleEditMessage = useCallback(
-    async (message: string) => {
+    async (values: { prompt: string; category?: Message["category"] }) => {
       if (loading) return;
-      form.setValue("prompt", message);
+      form.setValue("prompt", values.prompt);
+      if (values.category) {
+        form.setValue("category", values.category);
+      }
     },
     [form, loading],
   );
 
   const retrySendMessage = useCallback(
     async (message: Message) => {
-      form.reset({ ...form.getValues(), prompt: message.content });
-      const response = await sendMessage(message.content);
+      form.reset({
+        ...form.getValues(),
+        prompt: message.content,
+        category: message.category || "internal_medicine",
+      });
+      const response = await sendMessage({
+        prompt: message.content,
+        category: message.category || undefined,
+      });
       return response;
     },
     [sendMessage, form],
   );
 
   useEffect(() => {
-    if (!chatId) return;
+    if (!chatId || !init) return;
     if (initiatedChats.has(chatId)) return;
 
     const lastMessage = messages[messages.length - 1];
-    if (lastMessage && lastMessage.role === "user") {
+    if (lastMessage && lastMessage.role === "user" && messages.length === 1) {
       initiatedChats.add(chatId);
-      sendMessage(lastMessage.content, true);
+      sendMessage(
+        {
+          prompt: lastMessage.content,
+          category: lastMessage.category || undefined,
+        },
+        true,
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chatId, sendMessage]);
+  }, [chatId, sendMessage, init]);
 
   return (
     <>

@@ -1,9 +1,16 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Controller, useForm, UseFormReturn } from "react-hook-form";
-import { SendIcon, SquareIcon } from "lucide-react";
+import {
+  SendIcon,
+  SquareIcon,
+  Stethoscope,
+  Activity,
+  Baby,
+  Heart,
+} from "lucide-react";
 import { Field, FieldGroup, FieldSet } from "../ui/field";
 import {
   InputGroup,
@@ -15,6 +22,51 @@ import ModelSelection from "./modelselection";
 import useModel from "@/hooks/use-model";
 import { useRouter } from "next/navigation";
 import { ChatSchemaType } from "@/schemas";
+import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerClose,
+} from "@/components/ui/drawer";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+
+const CATEGORIES = [
+  {
+    value: "internal_medicine",
+    label: "Internal Medicine",
+    icon: Stethoscope,
+    description: "General medical diagnosis and treatment.",
+  },
+  {
+    value: "surgery",
+    label: "Surgery",
+    icon: Activity,
+    description: "Operative procedures and treatments.",
+  },
+  {
+    value: "obstetrics_gynecology",
+    label: "Obstetrics & Gynecology",
+    icon: Heart,
+    description: "Pregnancy, childbirth, and reproductive health.",
+  },
+  {
+    value: "pediatrics",
+    label: "Pediatrics",
+    icon: Baby,
+    description: "Medical care for infants and children.",
+  },
+] as const;
 
 type Props = {
   form: UseFormReturn<ChatSchemaType>;
@@ -32,6 +84,9 @@ const ChatInput = ({
 }: Props) => {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const promptValue = form.watch("prompt");
+  const isMobile = useIsMobile();
+  const [open, setOpen] = useState(false);
+  const categoryValue = form.watch("category") || "internal_medicine";
 
   useEffect(() => {
     const textarea = textareaRef.current;
@@ -41,73 +96,13 @@ const ChatInput = ({
     }
   }, [promptValue]);
 
-  // const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // const removeFile = () => {
-  //   form.setValue("file", undefined);
-  //   setAttachedFileName(null);
-  //   if (fileInputRef.current) {
-  //     fileInputRef.current.value = "";
-  //   }
-  // };
-
-  // Keep form model in sync when store changes (e.g., sidebar selection)
-
-  // const handleUpload = async (file: FileSchemaType) => {
-  //   setLoading(true);
-  //   const validatedFile = FileSchema.safeParse(file);
-  //   if (validatedFile.error) {
-  //     console.error(validatedFile.error.message);
-  //     toast.error("Please ensure your file is less than 6MB");
-  //     return null;
-  //   }
-  //   toast.loading("Uploading file...");
-
-  //   const response = file ? await uploadFile(file) : undefined;
-  //   if (response?.state === "ACTIVE") {
-  //     toast.dismiss();
-  //     toast.success("File uploaded successfully");
-  //   } else {
-  //     toast.error("Failed to upload file");
-  //   }
-  //   setLoading(false);
-  //   return response;
-  // };
-
-  // const removeFile = () => {
-  //   form.setValue("file", undefined);
-  //   setAttachedFileName(null);
-  //   if (fileInputRef.current) {
-  //     fileInputRef.current.value = "";
-  //   }
-  // };
-
   const showStopButton = loading && isStreaming;
 
   return (
     <form
       onSubmit={form.handleSubmit(handleSendMessage)}
-      className="absolute bottom-0 left-0 right-0 bg-transparent w-full max-w-2xl mx-auto  rounded-2xl  text-sm">
-      {/* Blurring design */}
-      {/* <div className="absolute -top-15 inset-x-0 h-15 bg-linear-to-t from-white via-white/50 to-transparent pointer-events-none blur-sm" /> */}
-      <FieldGroup className="mx-2 mb-2">
-        {/* File attachment chip */}
-        {/* {attachedFileName && (
-          <div className="absolute -top-9 left-1 z-10">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 border border-slate-200 rounded-lg text-xs text-slate-600 shadow-sm">
-              <FileIcon size={12} className="text-slate-400 shrink-0" />
-              <span className="max-w-45 truncate">{attachedFileName}</span>
-              <button
-                type="button"
-                onClick={removeFile}
-                className="ml-0.5 p-0.5 rounded-full hover:bg-slate-200 transition-colors text-slate-400 hover:text-slate-600"
-                aria-label="Remove file">
-                <XIcon size={12} />
-              </button>
-            </div>
-          </div>
-        )} */}
-
+      className="absolute bottom-0 right-0 left-0 bg-transparent w-full px-3 max-w-2xl mx-auto  rounded-2xl  text-sm">
+      <FieldGroup className="mb-2 relative">
         <Controller
           control={form.control}
           name="prompt"
@@ -126,14 +121,143 @@ const ChatInput = ({
                   id="block-end-input"
                   placeholder="Ask Clerkwise"
                 />
-                <InputGroupAddon align="block-end">
+                <InputGroupAddon
+                  align="block-end"
+                  className="flex justify-between pr-8 w-full">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setOpen(true)}
+                    className="flex items-center gap-1.5 h-7 px-2.5 rounded-lg border border-slate-300 dark:border-zinc-700 text-xs font-medium text-slate-700 dark:text-zinc-300 bg-white dark:bg-zinc-900 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors">
+                    {(() => {
+                      const cat =
+                        CATEGORIES.find((c) => c.value === categoryValue) ||
+                        CATEGORIES[0];
+                      const Icon = cat.icon;
+                      return (
+                        <>
+                          <Icon className="h-3.5 w-3.5 text-slate-500 dark:text-zinc-400" />
+                          <span>{cat.label}</span>
+                        </>
+                      );
+                    })()}
+                  </Button>
                   <InputGroupText
-                    className={`tabular-nums ${(field.value ?? "").trim().length > 90 ? "text-destructive" : ""}`}>
+                    className={`tabular-nums  ${(field.value ?? "").trim().length > 90 ? "text-destructive" : ""}`}>
                     {(field.value ?? "").trim().length}/100 chars
                   </InputGroupText>
                 </InputGroupAddon>
               </InputGroup>
             </Field>
+          )}
+        />
+
+        <Controller
+          name="category"
+          control={form.control}
+          render={({ field }) => (
+            <>
+              {isMobile ? (
+                <Drawer open={open} onOpenChange={setOpen}>
+                  <DrawerContent className="p-4 bg-background border-t">
+                    <DrawerHeader className="px-0">
+                      <DrawerTitle>Select Category</DrawerTitle>
+                      <DrawerDescription>
+                        Choose a medical category for your query.
+                      </DrawerDescription>
+                    </DrawerHeader>
+                    <div className="py-2">
+                      <RadioGroup
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        className="grid grid-cols-1 gap-4">
+                        {CATEGORIES.map((cat) => {
+                          const Icon = cat.icon;
+                          return (
+                            <div key={cat.value} className="relative">
+                              <RadioGroupItem
+                                value={cat.value}
+                                id={cat.value}
+                                className="peer sr-only"
+                              />
+                              <label
+                                htmlFor={cat.value}
+                                className="flex flex-col items-start gap-2 rounded-xl border-2 border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 hover:bg-slate-50 dark:hover:bg-zinc-800/50 hover:border-slate-300 dark:hover:border-zinc-700 peer-data-[state=checked]:border-indigo-600 dark:peer-data-[state=checked]:border-indigo-500 peer-data-[state=checked]:bg-indigo-50/20 dark:peer-data-[state=checked]:bg-indigo-950/20 cursor-pointer transition-all h-full">
+                                <div className="flex items-center gap-2">
+                                  <Icon className="h-5 w-5 text-slate-500 peer-data-[state=checked]:text-indigo-600 dark:peer-data-[state=checked]:text-indigo-400" />
+                                  <span className="font-semibold text-slate-900 dark:text-zinc-100 text-sm">
+                                    {cat.label}
+                                  </span>
+                                </div>
+                                <span className="text-xs text-slate-500 dark:text-zinc-400 text-left leading-normal">
+                                  {cat.description}
+                                </span>
+                              </label>
+                            </div>
+                          );
+                        })}
+                      </RadioGroup>
+                    </div>
+                    <DrawerFooter className="px-0 pt-4">
+                      <DrawerClose asChild>
+                        <Button type="button" className="w-full">
+                          Done
+                        </Button>
+                      </DrawerClose>
+                    </DrawerFooter>
+                  </DrawerContent>
+                </Drawer>
+              ) : (
+                <Dialog open={open} onOpenChange={setOpen}>
+                  <DialogContent className="max-w-md bg-background border p-6">
+                    <DialogHeader>
+                      <DialogTitle>Select Category</DialogTitle>
+                      <DialogDescription>
+                        Choose a medical category for your query.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="py-4">
+                      <RadioGroup
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {CATEGORIES.map((cat) => {
+                          const Icon = cat.icon;
+                          return (
+                            <div key={cat.value} className="relative">
+                              <RadioGroupItem
+                                value={cat.value}
+                                id={cat.value}
+                                className="peer sr-only"
+                              />
+                              <label
+                                htmlFor={cat.value}
+                                className="flex flex-col items-start gap-2 rounded-xl border-2 border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 hover:bg-slate-50 dark:hover:bg-zinc-800/50 hover:border-slate-300 dark:hover:border-zinc-700 peer-data-[state=checked]:border-indigo-600 dark:peer-data-[state=checked]:border-indigo-500 peer-data-[state=checked]:bg-indigo-50/20 dark:peer-data-[state=checked]:bg-indigo-950/20 cursor-pointer transition-all h-full">
+                                <div className="flex items-center gap-2">
+                                  <Icon className="h-5 w-5 text-slate-500 peer-data-[state=checked]:text-indigo-600 dark:peer-data-[state=checked]:text-indigo-400" />
+                                  <span className="font-semibold text-slate-900 dark:text-zinc-100 text-sm">
+                                    {cat.label}
+                                  </span>
+                                </div>
+                                <span className="text-xs text-slate-500 dark:text-zinc-400 text-left leading-normal">
+                                  {cat.description}
+                                </span>
+                              </label>
+                            </div>
+                          );
+                        })}
+                      </RadioGroup>
+                    </div>
+                    <div className="flex justify-end pt-2">
+                      <Button type="button" onClick={() => setOpen(false)}>
+                        Done
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              )}
+            </>
           )}
         />
 
@@ -156,47 +280,10 @@ const ChatInput = ({
             );
           }}
         /> */}
-        {/* <Controller
-          control={form.control}
-          name="file"
-          render={({ field }) => (
-            <Field className="rounded-full space-y-0 absolute bottom-1 right-10 w-9 h-fit">
-              <Button
-                variant={"ghost"}
-                size={"icon"}
-                type="button"
-                className="focus:outline-gray-400 focus:outline-2 focus:rounded-full  hover:bg-gray-200 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={form.watch("model") === "gemini-2.5-flash-lite"}>
-                <PaperclipIcon size={14} />
-                <Input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={async (e) => {
-                    if (e.target.files && e.target.files[0]) {
-                      const selectedFile = e.target.files[0];
-                      const uploadedResult = await handleUpload(selectedFile);
-                      console.log(uploadedResult);
-                      field.onChange(uploadedResult);
-                      if (uploadedResult?.state === "ACTIVE") {
-                        setAttachedFileName(selectedFile.name);
-                      }
-                    }
-                  }}
-                  disabled={
-                    loading || form.watch("model") === "gemini-2.5-flash-lite"
-                  }
-                  className="fixed -top-4 -left-4 size-0.5 opacity-0 pointer-events-none"
-                  tabIndex={-1}
-                />
-              </Button>
-            </Field>
-          )}
-        /> */}
 
         {showStopButton ? (
           <Button
-            className="hover:opacity-50 font-bold p-1.5 absolute bottom-1 right-0  rounded-full disabled:bg-gray-300 disabled:cursor-not-allowed"
+            className="hover:opacity-50 font-bold p-1.5 absolute bottom-1 right-0  rounded-full  disabled:cursor-not-allowed"
             type="button"
             variant={"destructive"}
             size={"icon"}
@@ -209,7 +296,7 @@ const ChatInput = ({
             variant={"ghost"}
             size={"icon"}
             disabled={loading || !form.watch("prompt")}
-            className="hover:opacity-50 font-bold p-1.5 absolute bottom-1 right-0  rounded-full disabled:bg-gray-300 disabled:cursor-not-allowed">
+            className="hover:opacity-50 font-bold p-1.5 absolute bottom-1 right-0   disabled:cursor-not-allowed">
             <SendIcon size={14} />
           </Button>
         )}

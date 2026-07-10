@@ -2,15 +2,15 @@
 
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { ChatSchemaType } from "@/schemas";
+import { ModelType } from "@/schemas";
 
 type ModelState = {
-  model: ChatSchemaType["model"];
-  setModel: (model: ChatSchemaType["model"]) => void;
+  model: ModelType;
+  setModel: (model: ModelType) => void;
   reset: () => void;
 };
 
-const DEFAULT_MODEL = "gemini-3.1-flash-lite-preview";
+const DEFAULT_MODEL = "gemini-3-flash-preview";
 
 const useModel = create<ModelState>()(
   persist(

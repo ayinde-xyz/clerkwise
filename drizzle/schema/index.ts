@@ -97,6 +97,16 @@ export const message = pgTable("Message", {
   role: varchar("role").notNull(),
   content: text("parts").notNull(),
   createdAt: timestamp("createdAt").notNull(),
+  category: varchar("category", {
+    enum: [
+      "internal_medicine",
+      "surgery",
+      "pediatrics",
+      "obstetrics_gynecology",
+    ],
+  })
+    .notNull()
+    .default("internal_medicine"),
   success: boolean("success").default(true).notNull(),
 });
 
