@@ -32,7 +32,7 @@ export const ChatSchema = z.object({
     .string()
     .trim()
     .min(1, { message: "Please enter a valid prompt" })
-    .max(100, "Description must be at most 100 characters."),
+    .max(500, "Description must be at most 500 characters."),
 
   category: z.enum([
     "internal_medicine",

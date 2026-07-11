@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const stream = await streamLLM(prompt, model, category);
+    const stream = streamLLM(prompt, category, model);
     const encoder = new TextEncoder();
 
     const customStream = new ReadableStream({
@@ -83,7 +83,4 @@ export async function POST(req: NextRequest) {
       { status: 500 },
     );
   }
-
-  // Here you would typically save the prompt to your database
-  // For demonstration, we'll just return the prompt back
 }
