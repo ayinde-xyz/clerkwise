@@ -77,7 +77,9 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const chatId = request.nextUrl.searchParams.get("chatId");
+    const data = await request.json();
+
+    const { chatId } = data;
 
     if (!chatId) {
       return NextResponse.json(
@@ -98,6 +100,8 @@ export async function DELETE(request: NextRequest) {
       .delete(chat)
       .where(and(eq(chat.id, chatId), eq(chat.userId, session.user.id)))
       .returning({ id: chat.id });
+
+    console.log(result, "This is the result");
     if (!result.length) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }

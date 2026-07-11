@@ -120,6 +120,7 @@ const ChatInterface = ({
           body: JSON.stringify({
             prompt: values.prompt,
             category: values.category || "internal_medicine",
+            model: store.model,
           }),
         });
 

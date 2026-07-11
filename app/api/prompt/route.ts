@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
   const origin = (await headers()).get("origin");
 
   const allowedOrigins = [
-    process.env.NEXT_PUBLIC_APP_URL!,
+    `https://${process.env.VERCEL_URL!}`,
     "http://localhost:3000",
   ];
 
@@ -43,14 +43,14 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json();
 
-  const { prompt } = body;
+  const { prompt, category, model } = body;
 
-  if (!prompt || typeof prompt !== "string") {
+  if (!prompt || !category || !model || typeof prompt !== "string") {
     return NextResponse.json({ error: "Invalid prompt" }, { status: 400 });
   }
 
   try {
-    const stream = await streamLLM(prompt);
+    const stream = streamLLM(prompt, category, model);
     const encoder = new TextEncoder();
 
     const customStream = new ReadableStream({
@@ -83,7 +83,4 @@ export async function POST(req: NextRequest) {
       { status: 500 },
     );
   }
-
-  // Here you would typically save the prompt to your database
-  // For demonstration, we'll just return the prompt back
 }
