@@ -10,6 +10,7 @@ import {
   SidebarMenuButton,
   SidebarMenuAction,
 } from "@/components/ui/sidebar";
+import { toast } from "sonner";
 
 type Props = {
   chat: Chat;
@@ -23,8 +24,15 @@ const ChatRow = ({ chat, error }: Props) => {
   const active = pathname.includes(chat.id);
 
   const removeChat = async (chatId: string) => {
-    await axios.delete(`/api/chat/${chatId}`);
-    router.push("/chat");
+    await axios.delete("/api/chat", {data: {chatId}})
+    .then(() => {
+      toast.success("Chat deleted successfully")
+      router.push("/chat");
+    }).catch((error) => {
+      console.error("Error deleting chat:", error)
+      toast.error("Failed to delete chat")
+    })
+    
   };
 
   return (

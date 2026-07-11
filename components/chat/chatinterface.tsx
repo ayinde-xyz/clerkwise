@@ -114,12 +114,15 @@ const ChatInterface = ({
           toast.dismiss();
         }
 
+        const model = store.model || "gemini-3-flash-preview";
+
         const response = await fetch("/api/prompt", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             prompt: values.prompt,
             category: values.category || "internal_medicine",
+            model,
           }),
         });
 

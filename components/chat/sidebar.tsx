@@ -21,7 +21,11 @@ import { Skeleton } from "../ui/skeleton";
 import ModelSelection from "./modelselection";
 import { useSession } from "@/lib/auth-client";
 import { SignOut, DeleteAccount } from "../auth/signout";
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from "@/components/ui/collapsible";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ChevronsUpDown } from "lucide-react";
 import { newChat } from "@/actions/newchat";
@@ -68,7 +72,8 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
       <SidebarHeader>
         <SidebarGroup className="items-center space-x-2">
           <div className="flex items-center space-x-2">
-            <h1 className={`${archivo.className} text-xl font-bold `}>
+            <h1
+              className={`${archivo.className} text-3xl font-bold text-primary`}>
               ClerkWise
             </h1>
             <Image
@@ -81,7 +86,6 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
           </div>
         </SidebarGroup>
         <SidebarGroup>
-          <SidebarGroupLabel>New Chat</SidebarGroupLabel>
           <SidebarGroupContent>
             <NewChat create={createNewChat} />
           </SidebarGroupContent>
@@ -118,12 +122,20 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
             <SidebarMenuItem className="list-none w-full">
               <Collapsible className="w-full group/collapsible">
                 <CollapsibleTrigger asChild>
-                  <SidebarMenuButton size="lg" className="w-full flex items-center justify-between p-2">
+                  <SidebarMenuButton
+                    size="lg"
+                    className="w-full flex items-center justify-between p-2">
                     <div className="flex items-center gap-3 min-w-0">
                       <Avatar className="h-8 w-8 rounded-lg">
-                        <AvatarImage src={session.data.user.image || ""} alt={session.data.user.name || "User"} />
+                        <AvatarImage
+                          src={session.data.user.image || ""}
+                          alt={session.data.user.name || "User"}
+                        />
                         <AvatarFallback className="rounded-lg">
-                          {getInitials(session.data.user.name, session.data.user.email)}
+                          {getInitials(
+                            session.data.user.name,
+                            session.data.user.email,
+                          )}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col items-start min-w-0">
