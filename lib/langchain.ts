@@ -88,7 +88,7 @@ type ClerkingStateType = typeof ClerkingState.State;
 // 3. Shared Prompt Helpers
 // ---------------------------------------------------------------------------
 
-const SYSTEM_PREAMBLE = `You are ClerkWise, an expert medical AI assistant designed for clinical education. You generate realistic, detailed medical clerking notes based on presenting complaints. Your responses should be medically accurate, well-structured, and suitable for medical students learning clinical history-taking.`;
+const SYSTEM_PREAMBLE = `You are ClerkWise, an expert clinical education AI designed to guide medical students through structured patient clerking. When a student provides a presenting complaint, you teach them exactly what questions to ask, what clinical information to elicit, and why each element matters. Your tone is that of an experienced consultant guiding a junior doctor at the bedside — authoritative yet encouraging. Your responses must be medically accurate, evidence-based, and formatted for easy learning.`;
 
 function sectionPrompt(
   section: string,
@@ -97,10 +97,10 @@ function sectionPrompt(
 ): string {
   return `${SYSTEM_PREAMBLE}
 
-You are generating the **${section}** section of a medical clerking.
+You are guiding a medical student through the **${section}** section of clerking a patient.
 
-**Patient Scenario:** ${state.prompt}
-**Medical Category:** ${state.category.replace(/_/g, " ")}
+**Presenting Complaint:** ${state.prompt}
+**Medical Specialty:** ${state.category.replace(/_/g, " ")}
 
 **Reference Medical Knowledge:**
 ${state.context}
@@ -108,7 +108,7 @@ ${state.context}
 **Instructions:**
 ${instructions}
 
-Generate ONLY the ${section} content. Do not include section headers or titles — just the clinical content. Be specific, realistic, and educational.`;
+Generate ONLY the ${section} guidance content. Do not include section headers or titles. Use a clear, structured format mixing short explanations with bullet points and example questions. Be thorough yet concise.`;
 }
 
 // ---------------------------------------------------------------------------
@@ -122,13 +122,13 @@ function createNodeFunctions(llm: BaseChatModel) {
   ): Promise<Partial<ClerkingStateType>> {
     const validationPrompt = `${SYSTEM_PREAMBLE}
 
-Determine whether the following user input describes a medical scenario, clinical case, or patient presenting complaint. 
+Determine whether the following user input contains a medical presenting complaint that a student could clerk.
 
-A VALID medical scenario includes ANY of the following:
-- A patient with symptoms (e.g., "45-year-old male with chest pain")
-- A clinical presentation (e.g., "acute abdomen in a young female")
-- A medical condition to clerk (e.g., "Type 2 diabetes presenting with polyuria")
-- A brief symptom description (e.g., "chest pain and shortness of breath")
+A VALID presenting complaint includes ANY of the following:
+- Symptoms a patient might present with (e.g., "chest pain", "shortness of breath", "abdominal pain")
+- A clinical scenario with a complaint (e.g., "45-year-old male with chest pain")
+- A medical condition with symptoms (e.g., "Type 2 diabetes presenting with polyuria")
+- Multiple symptoms (e.g., "fever, cough, and weight loss")
 
 An INVALID input is one that:
 - Asks a general knowledge question unrelated to medicine (e.g., "What is the weather?")
@@ -167,16 +167,17 @@ Respond with EXACTLY one word: "VALID" or "INVALID". Nothing else.`;
   ): Promise<Partial<ClerkingStateType>> {
     const errorMsg =
       state.errorMessage ||
-      `**Your input does not appear to be a medical scenario.**
+      `**Your input does not appear to be a presenting complaint.**
 
-To use ClerkWise, please provide a clinical presenting complaint. For example:
+ClerkWise guides you through clerking patients based on their presenting complaints. Please enter a symptom or clinical presentation, for example:
 
-- *"45-year-old male presenting with acute chest pain radiating to the left arm"*
-- *"28-year-old pregnant woman at 32 weeks with vaginal bleeding"*
-- *"6-month-old infant with fever, irritability, and a non-blanching rash"*
-- *"35-year-old female with right iliac fossa pain for 12 hours"*
+- *"chest pain"*
+- *"45-year-old male with acute abdominal pain"*
+- *"fever and cough in a 3-year-old child"*
+- *"vaginal bleeding at 32 weeks gestation"*
+- *"right iliac fossa pain"*
 
-Your prompt should describe a patient scenario including relevant details such as age, sex, and presenting symptoms.`;
+You can be brief (just the complaint) or include patient details for more tailored guidance.`;
 
     return { compiledOutput: errorMsg };
   }
@@ -206,18 +207,25 @@ Your prompt should describe a patient scenario including relevant details such a
   ): Promise<Partial<ClerkingStateType>> {
     const prompt = sectionPrompt(
       "History of Presenting Complaint (HPC)",
-      `Generate a detailed history of presenting complaint based on the patient scenario. Include:
-- Onset and duration of symptoms
-- Character and nature of the complaint
-- Location and radiation (if applicable)
-- Associated symptoms
-- Severity and progression
-- Aggravating and relieving factors
-- Timeline of events
-- What the patient has tried so far
+      `Guide the student on how to take a thorough History of Presenting Complaint for a patient with this complaint. Structure your response as:
 
-Use the SOCRATES framework where relevant (Site, Onset, Character, Radiation, Associated symptoms, Timing, Exacerbating/relieving factors, Severity).
-Write as a flowing clinical narrative, not bullet points.`,
+1. **Opening the consultation** — How to begin the conversation with the patient (open-ended questions to start).
+
+2. **Key questions to ask** — Provide the specific questions the student should ask to explore this complaint, organized using the SOCRATES framework where relevant:
+   - **S**ite: Where exactly?
+   - **O**nset: When and how did it start?
+   - **C**haracter: What does it feel like?
+   - **R**adiation: Does it go anywhere else?
+   - **A**ssociated symptoms: What else have you noticed?
+   - **T**iming: Is it constant or does it come and go?
+   - **E**xacerbating/relieving factors: What makes it better or worse?
+   - **S**everity: How bad is it on a scale of 1-10?
+
+3. **Symptom-specific probes** — Additional questions tailored to this specific presenting complaint that help narrow the differential (e.g., for chest pain: relationship to exertion, position, breathing).
+
+4. **Clinical reasoning tips** — Brief notes on why each question matters and what the answers might suggest diagnostically.
+
+Provide actual example questions the student can ask the patient, written in plain language (e.g., "Can you show me exactly where the pain is?").`,
       state,
     );
 
@@ -240,14 +248,23 @@ Write as a flowing clinical narrative, not bullet points.`,
   ): Promise<Partial<ClerkingStateType>> {
     const prompt = sectionPrompt(
       "Family History",
-      `Generate a relevant family history for this patient scenario. Include:
-- First-degree relatives' medical conditions (parents, siblings)
-- Hereditary conditions relevant to the presenting complaint
-- Age and health status of family members
-- Any family history of the same or related conditions
-- Relevant genetic/inherited conditions for this specialty
+      `Guide the student on how to take a relevant Family History for a patient with this presenting complaint. Structure your response as:
 
-Make the family history clinically relevant to the presenting complaint and category. Include both positive and negative findings (pertinent negatives).`,
+1. **Why family history matters here** — Briefly explain the clinical relevance of family history to this specific complaint (e.g., hereditary risk, genetic predisposition).
+
+2. **Essential questions to ask** — Provide specific questions:
+   - Health status of first-degree relatives (parents, siblings, children)
+   - Any family members with the same or related conditions
+   - Ages of onset for relevant conditions in the family
+   - Causes of death in deceased relatives
+
+3. **Condition-specific family history** — Questions specifically relevant to this complaint (e.g., for chest pain: "Has anyone in your family had a heart attack or stroke? At what age?").
+
+4. **Pertinent negatives to document** — Which family history negatives are important to specifically record and why (e.g., "No family history of sudden cardiac death" is significant for a cardiac presentation).
+
+5. **Hereditary conditions to screen for** — List conditions with genetic links that are relevant to this complaint and specialty.
+
+Provide actual example questions in patient-friendly language.`,
       state,
     );
 
@@ -273,18 +290,24 @@ Make the family history clinically relevant to the presenting complaint and cate
   ): Promise<Partial<ClerkingStateType>> {
     const prompt = sectionPrompt(
       "Social History",
-      `Generate a relevant social history for this patient scenario. Include:
-- Occupation and occupational exposures
-- Smoking history (pack-years if applicable)
-- Alcohol consumption (units per week)
-- Recreational drug use
-- Living situation and social support
-- Functional status and activities of daily living
-- Travel history (if relevant)
-- Sexual history (if relevant to the presentation)
-- Diet and exercise habits
+      `Guide the student on how to take a relevant Social History for a patient with this presenting complaint. Structure your response as:
 
-Focus on aspects that are clinically relevant to the presenting complaint.`,
+1. **Why social history matters here** — Explain how lifestyle and social factors relate to this complaint (e.g., smoking and respiratory symptoms, alcohol and liver disease).
+
+2. **Standard social history questions** — The core questions every student should ask:
+   - Smoking: "Do you smoke? Have you ever smoked? How many per day and for how long?" (explain pack-year calculation)
+   - Alcohol: "How much alcohol do you drink in a typical week?" (explain units)
+   - Recreational drugs: "Do you use any recreational substances?"
+   - Occupation: "What do you do for work? Are you exposed to any chemicals, dust, or fumes?"
+   - Living situation: "Who do you live with? Do you have stairs at home?"
+
+3. **Complaint-specific social questions** — Additional questions particularly relevant to this complaint (e.g., for respiratory: occupational exposures, pets; for pediatrics: school, safeguarding).
+
+4. **Functional assessment** — How to assess activities of daily living (ADLs) and why this matters for this presentation.
+
+5. **Sensitive topics** — How to sensitively approach topics like sexual history, domestic violence, or substance use when relevant, including suggested phrasing.
+
+Provide actual example questions in patient-friendly language.`,
       state,
     );
 
@@ -310,16 +333,27 @@ Focus on aspects that are clinically relevant to the presenting complaint.`,
   ): Promise<Partial<ClerkingStateType>> {
     const prompt = sectionPrompt(
       "Drug History",
-      `Generate a relevant drug history for this patient scenario. Include:
-- Current regular medications (with doses and frequency)
-- Over-the-counter medications
-- Recent medication changes
-- Known drug allergies and the nature of the reactions
-- Herbal or alternative remedies
-- Compliance/adherence to medications
-- Any relevant drug interactions
+      `Guide the student on how to take a thorough Drug History for a patient with this presenting complaint. Structure your response as:
 
-Ensure medications listed are realistic and relevant to the clinical scenario and any comorbidities suggested by the presentation.`,
+1. **Why drug history matters here** — Explain how medications can relate to this complaint (e.g., drugs that cause this symptom as a side effect, drugs that mask symptoms, drug interactions).
+
+2. **Essential questions to ask** — The core drug history questions:
+   - "What medications are you currently taking, including doses?"
+   - "Do you take any over-the-counter medications, vitamins, or supplements?"
+   - "Have any medications been started, stopped, or changed recently?"
+   - "Do you have any drug allergies?" (and if yes: "What happens when you take it?" — distinguish allergy from intolerance)
+   - "Do you use any herbal or traditional remedies?"
+   - "Do you take your medications as prescribed?"
+
+3. **Complaint-specific drug considerations** — Medications particularly relevant to this presentation:
+   - Drugs that could CAUSE these symptoms
+   - Drugs the patient might already be taking FOR these symptoms
+   - Important drug interactions to consider
+   - Medications that affect management decisions (e.g., anticoagulants before surgery)
+
+4. **Clinical pearls** — Tips for the student on common drug history pitfalls (e.g., patients forgetting inhalers, not mentioning the contraceptive pill, herbal remedies affecting coagulation).
+
+Provide actual example questions in patient-friendly language.`,
       state,
     );
 
@@ -343,17 +377,33 @@ Ensure medications listed are realistic and relevant to the clinical scenario an
   ): Promise<Partial<ClerkingStateType>> {
     const prompt = sectionPrompt(
       "Past Medical History",
-      `Generate a relevant past medical history for this patient scenario. Include:
-- Previous medical conditions and diagnoses
-- Previous surgical history (with dates if appropriate)
-- Previous hospitalizations
-- Relevant childhood illnesses
-- Immunization status (if relevant, especially for pediatrics)
-- Screening history (if relevant)
-- Previous similar episodes
-- Chronic conditions and their management
+      `Guide the student on how to take a relevant Past Medical History for a patient with this presenting complaint. Structure your response as:
 
-Use the mnemonic MJ THREADS if helpful (Myocardial infarction, Jaundice, Tuberculosis, Hypertension, Rheumatic fever, Epilepsy, Asthma, Diabetes, Stroke). Include both positive and pertinent negative findings.`,
+1. **Why PMH matters here** — Explain how pre-existing conditions relate to this complaint (e.g., previous episodes, comorbidities that alter management, surgical history implications).
+
+2. **Systematic approach** — Teach the student to use the **MJ THREADS** mnemonic:
+   - **M**yocardial infarction / heart disease
+   - **J**aundice / liver disease
+   - **T**uberculosis
+   - **H**ypertension
+   - **R**heumatic fever
+   - **E**pilepsy
+   - **A**sthma / COPD
+   - **D**iabetes
+   - **S**troke
+   Explain which of these are particularly relevant to this complaint and why.
+
+3. **Key questions to ask** — Provide specific questions:
+   - "Do you have any medical conditions or see a doctor regularly?"
+   - "Have you ever been in hospital before? What for?"
+   - "Have you had any operations?"
+   - "Have you ever had anything similar to this before?"
+
+4. **Complaint-specific PMH** — Conditions particularly relevant to this presentation that the student should specifically ask about. Explain why each matters.
+
+5. **Pertinent negatives** — Which PMH negatives are important to document for this complaint and why (e.g., "No previous DVT/PE" is relevant for a patient with pleuritic chest pain).
+
+Provide actual example questions in patient-friendly language.`,
       state,
     );
 
@@ -379,17 +429,27 @@ Use the mnemonic MJ THREADS if helpful (Myocardial infarction, Jaundice, Tubercu
   ): Promise<Partial<ClerkingStateType>> {
     const prompt = sectionPrompt(
       "Differential Diagnosis",
-      `Based on the presenting complaint, history, and the category of ${state.category.replace(/_/g, " ")}, generate a differential diagnosis. Include:
+      `Guide the student on how to formulate a differential diagnosis for this presenting complaint in ${state.category.replace(/_/g, " ")}. Structure your response as:
 
-1. **Most likely diagnosis** — State the most probable diagnosis with reasoning based on the clinical features
-2. **Differential diagnoses** — List 4-6 alternative diagnoses in order of likelihood, each with:
-   - The condition name
-   - Key features that support or argue against this diagnosis
-   - Any investigations that would help confirm or exclude it
-3. **Red flags** — Identify any red flag features in the presentation that require urgent attention
-4. **Recommended investigations** — Suggest initial investigations to narrow the differential (bloods, imaging, special tests)
+1. **How to think about this complaint** — Teach the student a systematic approach to generating differentials for this symptom (e.g., anatomical approach, surgical sieve, by system, most common vs most dangerous).
 
-Be systematic and use clinical reasoning. Justify your differential ranking based on the available clinical information.`,
+2. **Key differentials to consider** — List 5-8 differential diagnoses in a structured format:
+   - Condition name
+   - Key features from the history that would SUPPORT this diagnosis
+   - Key features that would make it LESS likely
+   - The "clincher" — the one question or finding that most helps confirm or exclude it
+
+3. **Red flags to watch for** — Danger signs in this presentation that require urgent action. Explain why each is a red flag and what it might indicate.
+
+4. **Initial investigations** — What investigations the student should consider requesting and why:
+   - Bedside tests (observations, ECG, urine dip, blood glucose)
+   - Blood tests (and what abnormalities to look for)
+   - Imaging (and what findings would help)
+   - Special tests (if relevant)
+
+5. **Clinical reasoning framework** — Help the student understand how to rank differentials by likelihood and severity, balancing "most common" against "must not miss" diagnoses.
+
+Teach the student to THINK, not just memorize lists.`,
       state,
     );
 
@@ -417,43 +477,45 @@ Be systematic and use clinical reasoning. Justify your differential ranking base
       .replace(/_/g, " ")
       .replace(/\b\w/g, (c) => c.toUpperCase());
 
-    const compiled = `## Clinical Clerking — ${categoryLabel}
+    const compiled = `## ClerkWise Clerking Guide — ${categoryLabel}
 
 **Presenting Complaint:** ${state.prompt}
 
+This guide walks you through a structured approach to clerking a patient with this presentation. Use it as a framework — adapt your questions based on the patient's responses.
+
 ---
 
-### History of Presenting Complaint
+### 📋 History of Presenting Complaint
 
 ${state.hpc}
 
 ---
 
-### Family History
+### 👨‍👩‍👧 Family History
 
 ${state.familyHistory}
 
 ---
 
-### Social History
+### 🏠 Social History
 
 ${state.socialHistory}
 
 ---
 
-### Drug History
+### 💊 Drug History
 
 ${state.drugHistory}
 
 ---
 
-### Past Medical History
+### 🏥 Past Medical History
 
 ${state.pastMedicalHistory}
 
 ---
 
-### Differential Diagnosis
+### 🔍 Differential Diagnosis & Investigations
 
 ${state.differentialDiagnosis}`;
 

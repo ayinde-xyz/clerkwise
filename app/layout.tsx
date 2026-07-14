@@ -4,7 +4,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Clerkwise AI",
-  description: "Built using Next.js and Firebase Genkit",
+  description: "Built using Next.js and Langgraph and Langchain",
 };
 
 export default async function RootLayout({
