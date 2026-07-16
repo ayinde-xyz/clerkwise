@@ -36,5 +36,3 @@ export const LoginButton = ({
     </span>
   );
 };
-
-// @opentelemetry/api

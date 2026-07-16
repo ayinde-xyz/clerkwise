@@ -56,8 +56,8 @@ export function LoginForm({
     <div className={cn("flex flex-col gap-4", className)} {...props}>
       <div className="flex flex-col gap-6">
         <div className="flex flex-col items-center text-center">
-          <h1 className="text-2xl font-bold text-gray-900">Welcome Back</h1>
-          <p className="text-sm text-gray-600">Log in to your account</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-zinc-100">Welcome Back</h1>
+          <p className="text-sm text-gray-600 dark:text-zinc-400">Log in to your account</p>
         </div>
         <Form {...form}>
           <form
@@ -68,7 +68,7 @@ export function LoginForm({
               name="email"
               render={({ field }) => (
                 <FormItem className="grid gap-2">
-                  <FormLabel htmlFor="email" className="text-gray-700">
+                  <FormLabel htmlFor="email" className="text-gray-700 dark:text-zinc-300">
                     Email
                   </FormLabel>
                   <FormControl>
@@ -77,7 +77,7 @@ export function LoginForm({
                       id="email"
                       type="email"
                       placeholder="m@example.com"
-                      className="border border-gray-200 bg-white/50 focus:bg-white transition-colors"
+                      className="border border-gray-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-950/50 focus:bg-white dark:focus:bg-zinc-950 text-gray-900 dark:text-zinc-100 placeholder:text-gray-400 dark:placeholder:text-zinc-600 transition-colors"
                     />
                   </FormControl>
                   <FormMessage />
@@ -90,12 +90,12 @@ export function LoginForm({
               render={({ field }) => (
                 <FormItem className="grid gap-2">
                   <div className="flex items-center">
-                    <FormLabel htmlFor="password" className="text-gray-700">
+                    <FormLabel htmlFor="password" className="text-gray-700 dark:text-zinc-300">
                       Password
                     </FormLabel>
                     <Link
                       href="/auth/forgot-password"
-                      className="ml-auto text-xs text-blue-600 hover:text-blue-700 underline-offset-2 hover:underline transition-colors">
+                      className="ml-auto text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 underline-offset-2 hover:underline transition-colors">
                       Forgot your password?
                     </Link>
                   </div>
@@ -105,7 +105,7 @@ export function LoginForm({
                       id="password"
                       type="password"
                       placeholder="***********"
-                      className="border border-gray-200 bg-white/50 focus:bg-white transition-colors"
+                      className="border border-gray-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-950/50 focus:bg-white dark:focus:bg-zinc-950 text-gray-900 dark:text-zinc-100 placeholder:text-gray-400 dark:placeholder:text-zinc-600 transition-colors"
                     />
                   </FormControl>
                   <FormMessage />
@@ -115,23 +115,23 @@ export function LoginForm({
             <Button
               type="submit"
               disabled={isPending}
-              className="w-full bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold disabled:cursor-not-allowed transition-all duration-300">
+              className="w-full bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 dark:from-blue-500 dark:to-purple-500 dark:hover:from-blue-600 dark:hover:to-purple-600 text-white font-semibold disabled:cursor-not-allowed transition-all duration-300">
               {isPending && <Loader2 className="animate-spin" size={14} />}
               {isPending ? "Logging in..." : "Log in"}
             </Button>
           </form>
         </Form>
-        <div className="relative text-center text-xs after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-gray-200">
-          <span className="relative z-10 bg-white/60 px-2 text-gray-600">
+        <div className="relative text-center text-xs after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-gray-200 dark:after:border-zinc-800">
+          <span className="relative z-10 bg-white/60 dark:bg-zinc-900/90 px-2 text-gray-600 dark:text-zinc-400">
             Or continue with
           </span>
         </div>
         <Social />
-        <div className="text-center text-xs text-gray-600">
+        <div className="text-center text-xs text-gray-600 dark:text-zinc-400">
           Don&apos;t have an account?{" "}
           <Link
             href="/auth/signup"
-            className="text-blue-600 hover:text-blue-700 underline underline-offset-4 transition-colors">
+            className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 underline underline-offset-4 transition-colors">
             Create an account
           </Link>
         </div>
