@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import Chat from "@/components/chat/chat";
 import { headers } from "next/headers";
-import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import ChatInterface from "@/components/chat/chatinterface";
 
 const ChatPage = async () => {
@@ -13,7 +13,7 @@ const ChatPage = async () => {
   // const { id } = params || {};
 
   if (!session || !session.user) {
-    return notFound();
+    redirect("/auth/login");
   }
 
   return (

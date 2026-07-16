@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import Chat from "@/components/chat/chat";
 import { headers } from "next/headers";
-import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import ChatInterface from "@/components/chat/chatinterface";
 import { getMessagesByChatId } from "@/actions/newchat";
 
@@ -22,13 +22,11 @@ const ChatPage = async ({ params, searchParams }: ChatPageProps) => {
   const messages = await getMessagesByChatId(chatId);
 
   if (!session || !session.user) {
-    return notFound();
+    redirect("/auth/login");
   }
 
   return (
     <div className="flex flex-col overflow-hidden w-full h-dvh relative">
-      {/* <p>Yes i am still there</p> */}
-      {/* Chat */}
       <ChatInterface initialMessages={messages} chatId={chatId} init={init} />
     </div>
   );

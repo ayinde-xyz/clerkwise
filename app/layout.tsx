@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { robota } from "./fonts";
 import "./globals.css";
+import { ThemeProvider } from "@/components/theme-provider";
 
 export const metadata: Metadata = {
   title: "Clerkwise AI",
-  description: "Built using Next.js and Firebase Genkit",
+  description: "Built using Next.js and Langgraph and Langchain",
 };
 
 export default async function RootLayout({
@@ -13,11 +14,21 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${robota.className} antialiased`}>{children}</body>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${robota.className} antialiased`}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   );
 }
+
 
 // ↑ @types/node 20.17.14 → 22.13.1
 // ↑ @types/react 19.0.7 → 19.0.8

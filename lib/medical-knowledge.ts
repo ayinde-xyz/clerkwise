@@ -15,6 +15,7 @@ type SectionType =
   | "common_presentations"
   | "differential_diagnosis_guide"
   | "clerking_template"
+  | "questioning_techniques"
   | "red_flags";
 
 // ---------------------------------------------------------------------------
@@ -567,14 +568,17 @@ export function retrieveByCategory(category: MedicalCategory): Document[] {
 
 /**
  * Formats retrieved documents into a single context string suitable for
- * injection into an LLM prompt, with section headers.
+ * injection into an LLM prompt as teaching reference material.
  */
 export function formatRetrievedContext(docs: Document[]): string {
   if (docs.length === 0) {
-    return "No specific medical reference context available for this category.";
+    return "No specific medical reference context available for this category. Use general medical knowledge to guide the student.";
   }
 
-  return docs
+  const header =
+    "The following reference material should inform your guidance. Use it to provide accurate, specialty-specific teaching points:\n\n";
+
+  const body = docs
     .map((doc) => {
       const section = (doc.metadata.section as string)
         .replace(/_/g, " ")
@@ -582,4 +586,6 @@ export function formatRetrievedContext(docs: Document[]): string {
       return `--- ${section} ---\n${doc.pageContent}`;
     })
     .join("\n\n");
+
+  return header + body;
 }

@@ -67,10 +67,10 @@ export function ResetPasswordForm({
     <div className={cn("flex flex-col gap-4", className)} {...props}>
       <div className="flex flex-col gap-6">
         <div className="flex flex-col items-center text-center">
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-zinc-100">
             Reset your Password
           </h1>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 dark:text-zinc-400">
             Please enter your new password to continue
           </p>
         </div>
@@ -84,7 +84,7 @@ export function ResetPasswordForm({
               name="password"
               render={({ field }) => (
                 <FormItem className="grid gap-2">
-                  <FormLabel htmlFor="password" className="text-gray-700">
+                  <FormLabel htmlFor="password" className="text-gray-700 dark:text-zinc-300">
                     Password
                   </FormLabel>
                   <FormControl>
@@ -94,7 +94,7 @@ export function ResetPasswordForm({
                       type="password"
                       placeholder="Enter your new password"
                       required
-                      className="border border-gray-200 bg-white/50 focus:bg-white transition-colors"
+                      className="border border-gray-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-950/50 focus:bg-white dark:focus:bg-zinc-950 text-gray-900 dark:text-zinc-100 placeholder:text-gray-400 dark:placeholder:text-zinc-600 transition-colors"
                     />
                   </FormControl>
                   <FormMessage />
@@ -108,7 +108,7 @@ export function ResetPasswordForm({
                 <FormItem className="grid gap-2">
                   <FormLabel
                     htmlFor="confirmPassword"
-                    className="text-gray-700">
+                    className="text-gray-700 dark:text-zinc-300">
                     Confirm Password
                   </FormLabel>
                   <FormControl>
@@ -118,7 +118,7 @@ export function ResetPasswordForm({
                       type="password"
                       placeholder="Confirm your password"
                       required
-                      className="border border-gray-200 bg-white/50 focus:bg-white transition-colors"
+                      className="border border-gray-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-950/50 focus:bg-white dark:focus:bg-zinc-950 text-gray-900 dark:text-zinc-100 placeholder:text-gray-400 dark:placeholder:text-zinc-600 transition-colors"
                     />
                   </FormControl>
                   <FormMessage />
@@ -128,7 +128,7 @@ export function ResetPasswordForm({
             <Button
               type="submit"
               disabled={loading}
-              className="w-full bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold disabled:cursor-not-allowed transition-all duration-300">
+              className="w-full bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 dark:from-blue-500 dark:to-purple-500 dark:hover:from-blue-600 dark:hover:to-purple-600 text-white font-semibold disabled:cursor-not-allowed transition-all duration-300">
               {loading && <Loader2 className="animate-spin" size={14} />}
               {loading ? "Resetting..." : "Reset Password"}
             </Button>

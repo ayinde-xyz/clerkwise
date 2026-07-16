@@ -107,7 +107,7 @@ const ChatInput = ({
           control={form.control}
           name="prompt"
           render={({ field, fieldState }) => (
-            <Field className="max-w-2xl bg-slate-200 rounded-2xl p-1">
+            <Field className="max-w-2xl bg-slate-200 dark:bg-zinc-800/80 rounded-2xl p-1">
               <InputGroup>
                 <InputGroupTextarea
                   disabled={loading}
