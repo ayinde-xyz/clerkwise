@@ -8,7 +8,7 @@ import { sendEmailAction } from "@/actions/reset";
 const cookieDomain: string | undefined =
   process.env.VERCEL === "1"
     ? process.env.VERCEL_ENV === "production"
-      ? "gemini-clone-eta-weld.vercel.app"
+      ? "clerkwisebot.vercel.app"
       : process.env.VERCEL_ENV === "preview"
         ? `.${process.env.VERCEL_URL}`
         : undefined
@@ -98,7 +98,7 @@ export const auth = betterAuth({
     },
     trustedOrigins: [
       "http://localhost:3000",
-      "https://gemini-clone-eta-weld.vercel.app",
+      "https://clerkwisebot.vercel.app",
     ],
   },
 });

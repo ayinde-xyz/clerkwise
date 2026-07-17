@@ -3,7 +3,7 @@
 import React from "react";
 import transporter from "@/lib/nodemailer";
 import { render } from "@react-email/components";
-import Email from "transactional/emails/email";
+import Email from "@/packages/transactional/emails/email";
 
 export async function sendEmailAction({
   to,

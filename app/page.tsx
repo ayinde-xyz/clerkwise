@@ -26,13 +26,7 @@ export default async function Home() {
       {/* Header / Navbar */}
       <header className="w-full max-w-6xl mx-auto flex justify-between items-center py-4 px-6 z-10 dark:text-zinc-100">
         <div className="flex items-center gap-2">
-          <Image
-            src={logo}
-            alt="ClerkWise Logo"
-            width={32}
-            height={32}
-            className="dark:invert"
-          />
+          <Image src={logo} alt="ClerkWise Logo" width={32} height={32} />
           <span
             className={cn(
               "text-xl font-bold text-gray-800 dark:text-zinc-100",
@@ -80,7 +74,6 @@ export default async function Home() {
                   alt="Clerkwise AI Logo"
                   height={150}
                   width={150}
-                  className="dark:invert"
                 />
               </div>
             </div>
@@ -352,7 +345,9 @@ export default async function Home() {
             </p>
             <p className="text-xs text-gray-500 dark:text-zinc-500">
               Built by{" "}
-              <Link href="https://ayindeabdulrahman.xyz" aria-label="ayinde-xyz">
+              <Link
+                href="https://ayindeabdulrahman.xyz"
+                aria-label="ayinde-xyz">
                 <span>ayinde-xyz</span>
               </Link>
             </p>
