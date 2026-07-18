@@ -1,6 +1,6 @@
 # ClerkWise AI
 
-ClerkWise is a premium clinical education AI platform designed to guide medical students through structured patient history-taking (clerking) and clinical reasoning. When a student enters a patient's presenting chief complaint, ClerkWise orchestrates an advanced multi-step LangGraph workflow to produce a detailed, specialty-specific guide teaching the student exactly what questions to ask, what clinical signs to check, and why they matter.
+ClerkWise is a clinical education AI platform designed to guide medical students through structured patient history-taking (clerking) and clinical reasoning. When a student enters a patient's presenting chief complaint, ClerkWise orchestrates an advanced multi-step LangGraph workflow to produce a detailed, specialty-specific guide teaching the student exactly what questions to ask, what clinical signs to check, and why they matter.
 
 ---
 
@@ -35,7 +35,7 @@ ClerkWise is a premium clinical education AI platform designed to guide medical 
 
 - **Framework**: [Next.js 16 (App Router)](https://nextjs.org/)
 - **AI/LLM Framework**: [LangChain.js](https://js.langchain.com/) & [LangGraph.js](https://langchain-ai.github.io/langgraphjs/)
-- **Database / ORM**: [Drizzle ORM](https://orm.drizzle.team/) with [Postgres](https://www.postgresql.org/)
+- **Database / ORM**: [Drizzle ORM](https://orm.drizzle.team/) , [Postgres](https://www.postgresql.org/) and [Supabase](https://www.supabase.com/)
 - **Auth**: [Better Auth](https://www.better-auth.com/)
 - **Rate Limiter**: [Upstash Ratelimit](https://github.com/upstash/ratelimit) via Upstash Redis
 - **State Management**: [Zustand](https://zustand.docs.pmnd.rs/getting-started/introduction)
@@ -92,46 +92,54 @@ NODEMAILER_APP_PASSWORD=your_app_password
 ## 🚀 Getting Started
 
 ### 1. Clone the repository
+
 ```bash
 git clone https://github.com/ayinde-xyz/gemini-clone.git
 cd gemini-clone
 ```
 
 ### 2. Install Dependencies
+
 We recommend using [Bun](https://bun.sh/) for dependency management and execution:
+
 ```bash
 bun install
 ```
 
 ### 3. Setup Database Schemas
+
 Generate and push Drizzle migrations to your Postgres instance:
+
 ```bash
 bun db:generate
 bun db:push
 ```
 
 ### 4. Start the Dev Server
+
 Run the local next development environment:
+
 ```bash
 bun dev
 ```
+
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
 ## 📜 Available Scripts
 
-| Script | Command | Description |
-|---|---|---|
-| **dev** | `bun dev` | Runs the Next.js development server with Turbopack |
-| **build** | `bun build` | Compiles the production build |
-| **start** | `bun start` | Boots the compiled production application |
-| **lint** | `bun lint` | Type-checks code style and runs ESLint linting |
-| **db:generate** | `bun db:generate` | Creates SQL migrations via Drizzle Kit |
-| **db:push** | `bun db:push` | Pushes the schema definition directly to Postgres |
-| **db:studio** | `bun db:studio` | Launches the interactive Drizzle Studio database explorer |
-| **test** | `npx tsx tests/runner.ts` | Executes the 75-case E2E validation test runner |
-| **typecheck** | `npx tsc --noEmit` | Validates TypeScript compilation |
+| Script          | Command                   | Description                                               |
+| --------------- | ------------------------- | --------------------------------------------------------- |
+| **dev**         | `bun dev`                 | Runs the Next.js development server with Turbopack        |
+| **build**       | `bun build`               | Compiles the production build                             |
+| **start**       | `bun start`               | Boots the compiled production application                 |
+| **lint**        | `bun lint`                | Type-checks code style and runs ESLint linting            |
+| **db:generate** | `bun db:generate`         | Creates SQL migrations via Drizzle Kit                    |
+| **db:push**     | `bun db:push`             | Pushes the schema definition directly to Postgres         |
+| **db:studio**   | `bun db:studio`           | Launches the interactive Drizzle Studio database explorer |
+| **test**        | `npx tsx tests/runner.ts` | Executes the 75-case E2E validation test runner           |
+| **typecheck**   | `npx tsc --noEmit`        | Validates TypeScript compilation                          |
 
 ---
 
@@ -144,6 +152,7 @@ npx tsx tests/runner.ts
 ```
 
 It validates 75 test cases covering:
+
 - **Tier 1**: UI Feature Presence (Hero, Feature cards, sequential steps, fonts, gradients)
 - **Tier 2**: Boundaries (Responsive breakpoint scaling, screen-reader Aria elements, empty grid handling)
 - **Tier 3**: Cross-Feature Interactions (Theme Toggle x Glassmorphic styles, Auth Session state routing)

@@ -48,14 +48,14 @@ const Message = ({
   };
 
   return (
-    <UiMessage align={isModel ? "end" : "start"} className="py-2 px-1">
+    <UiMessage align={isModel ? "end" : "start"} className="px-1">
       <MessageContent className="max-w-[85%]">
         <MessageHeader
           className={cn(
             "flex items-center gap-2 text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5",
             isModel ? "justify-end" : "justify-start",
           )}>
-          {message.category && (
+          {message.category && !isModel && (
             <span className="text-[9px] bg-slate-200/60 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 px-1.5 py-0.5 rounded font-normal normal-case">
               {getCategoryLabel(message.category)}
             </span>

@@ -63,12 +63,6 @@ const AppSidebar = async ({
     return null;
   }
 
-  // const {
-  //   data: chats,
-  //   error,
-  //   isLoading,
-  // } = useSWR<Chat[]>("/api/chat", fetcher);
-
   const chats = await chatTitles(session.user.id);
 
   return (
@@ -106,13 +100,6 @@ const AppSidebar = async ({
           <SidebarGroupLabel>Chats</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {/* {isLoading && (
-                <div className="animate-pulse text-center flex flex-col space-y-2 text-white">
-                  <Skeleton className="h-10 w-full" />
-                  <Skeleton className="h-10 w-full" />
-                  <Skeleton className="h-10 w-full" />
-                </div>
-              )} */}
               {chats?.map((chat) => (
                 <ChatRow key={chat.id} chat={chat} />
               ))}

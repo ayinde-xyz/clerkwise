@@ -231,7 +231,7 @@ const ChatInterface = ({
         }
         try {
           setLoading(true);
-          const newChatId = await newChat(session.data);
+          const newChatId = await newChat(session.data.user.id);
           const tempMsgId =
             typeof window !== "undefined" && window.crypto?.randomUUID
               ? window.crypto.randomUUID()

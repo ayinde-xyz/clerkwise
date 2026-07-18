@@ -16,16 +16,19 @@ const models = [
     title: "Gemini 3.1 Pro",
     value: "gemini-3-flash-preview",
     description: "",
+    available: true,
   },
   {
     title: "GPT 5.5",
     value: "gpt-5.5-2026-04-23",
     description: "",
+    available: false,
   },
   {
     title: "Claude Sonnet 5",
     value: "claude-sonnet-5",
     description: "The best model in the world for multimodal understanding",
+    available: false,
   },
 ];
 
@@ -47,7 +50,7 @@ const ModelSelection = () => {
       </SelectTrigger>
       <SelectContent position="item-aligned">
         {models.map((model) => (
-          <SelectItem key={model.value} value={model.value}>
+          <SelectItem key={model.value} value={model.value} disabled={!model.available}>
             {model.title}
             <SelectSeparator />
           </SelectItem>
