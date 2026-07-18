@@ -10,6 +10,7 @@ import {
   Activity,
   Baby,
   Heart,
+  Ambulance,
 } from "lucide-react";
 import { Field, FieldGroup, FieldSet } from "../ui/field";
 import {
@@ -18,9 +19,6 @@ import {
   InputGroupText,
   InputGroupTextarea,
 } from "../ui/input-group";
-import ModelSelection from "./modelselection";
-import useModel from "@/hooks/use-model";
-import { useRouter } from "next/navigation";
 import { ChatSchemaType } from "@/schemas";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
@@ -51,8 +49,9 @@ const CATEGORIES = [
   {
     value: "surgery",
     label: "Surgery",
-    icon: Activity,
-    description: "Operative procedures and treatments.",
+    icon: Ambulance,
+    description:
+      "Complaints concerning trauma, emergency and surgical operations",
   },
   {
     value: "obstetrics_gynecology",
@@ -119,7 +118,7 @@ const ChatInput = ({
                   }}
                   aria-invalid={fieldState.invalid}
                   id="block-end-input"
-                  placeholder="Ask Clerkwise"
+                  placeholder={categoryValue === "internal_medicine" ? "Fever and Neck pain in a 38 year old man" : categoryValue === "pediatrics" ? "Yellow eyes in a 10 hour old newborn" : categoryValue === "obstetrics_gynecology" ? "vaginal bleeding at 32 weeks gestation" : "45-year-old male with acute abdominal pain"}
                 />
                 <InputGroupAddon
                   align="block-end"
@@ -260,26 +259,6 @@ const ChatInput = ({
             </>
           )}
         />
-
-        {/* <Controller
-          control={form.control}
-          name="model"
-          render={({ field, fieldState }) => {
-            const handleChange = (v: ChatSchemaType["model"]) => {
-              field.onChange(v);
-              store.setModel(v);
-            };
-            return (
-              <FieldSet className="absolute bottom-1 right-18 w-7 rounded-b-lg">
-                <ModelSelection
-                  field={{ ...field, onChange: handleChange }}
-                  fieldState={fieldState}
-                  isSidebar={false}
-                />
-              </FieldSet>
-            );
-          }}
-        /> */}
 
         {showStopButton ? (
           <Button

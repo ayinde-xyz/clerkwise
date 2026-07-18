@@ -66,7 +66,7 @@ const Chat = ({
   const showTypingIndicator = loading && isLastMessageFromUser;
 
   return (
-    <MessageScrollerProvider>
+    <MessageScrollerProvider autoScroll>
       <MessageScroller className="flex-1 relative ">
         <MessageScrollerViewport onScroll={handleScroll}>
           <ChatHeader messages={messages} showHeader={showHeader} />

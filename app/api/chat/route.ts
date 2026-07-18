@@ -101,10 +101,12 @@ export async function DELETE(request: NextRequest) {
       .where(and(eq(chat.id, chatId), eq(chat.userId, session.user.id)))
       .returning({ id: chat.id });
 
-    console.log(result, "This is the result");
     if (!result.length) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
+
+    revalidatePath("/chat", "layout");
+    revalidatePath(`/chat/${chatId}`);
 
     return NextResponse.json(
       { message: "Chat deleted successfully." },

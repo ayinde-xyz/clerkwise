@@ -5,16 +5,19 @@ import { type Chat, chat, message } from "@/drizzle/schema";
 import { Session } from "@/lib/auth-client";
 import { asc, eq } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
+import { revalidatePath } from "next/cache";
 
-export const newChat = async (session: Session) => {
+export const newChat = async (userId: string) => {
   const [created] = await db
     .insert(chat)
     .values({
-      userId: session?.user.id || "",
+      userId,
       title: "New Chat",
       createdAt: new Date(),
     })
     .returning({ id: chat.id });
+
+  revalidatePath("/chat");
 
   return created.id;
 };
@@ -35,35 +38,14 @@ export const getMessagesByChatId = async (chatId: string) => {
   return await getMessages();
 };
 
-// export const addMessagesByChatId = async (
-//   chatId: string,
-//   prompt: string,
-//   role: "user" | "model",
-// ) => {
-//   const checkMessageWithId = await db.query.message.findMany({
-//     where: (message, { eq }) => eq(message.chatId, chatId),
-//   });
+export const chatTitles = async (userId: string) => {
+  const getChatTitlesByChatId = await db
+    .select()
+    .from(chat)
+    .where(eq(chat.userId, userId));
 
-//   if (!checkMessageWithId.length) {
-//     await db.update(chat).set({ title: prompt }).where(eq(chat.id, chatId));
-//   }
-
-//   const addMessages = await db
-//     .insert(message)
-//     .values({
-//       id: crypto.randomUUID(),
-//       chatId: chatId,
-//       content: prompt,
-//       attachments: [],
-//       role,
-//       createdAt: new Date(),
-//     })
-//     .returning({
-//       id: message.id,
-//     });
-
-//   return addMessages;
-// };
+  return getChatTitlesByChatId;
+};
 
 export const deleteMessageById = async (messageId: string) => {
   const deletedMessageId = await db

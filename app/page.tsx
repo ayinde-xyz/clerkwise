@@ -42,7 +42,7 @@ export default async function Home() {
               <Button
                 variant="outline"
                 className="border-gray-300 dark:border-zinc-700 text-gray-700 dark:text-zinc-200 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors">
-                Dashboard
+                Go to Chat
               </Button>
             </Link>
           ) : (
