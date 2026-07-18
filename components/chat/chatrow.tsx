@@ -29,7 +29,10 @@ const ChatRow = ({ chat }: Props) => {
       .delete("/api/chat", { data: { chatId } })
       .then(() => {
         toast.success("Chat deleted successfully");
-        router.push("/chat");
+        router.refresh();
+        if (active) {
+          router.push("/chat");
+        }
       })
       .catch((error) => {
         console.error("Error deleting chat:", error);

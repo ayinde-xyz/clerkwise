@@ -63,12 +63,6 @@ const AppSidebar = async ({
     return null;
   }
 
-  const createNewChat = async () => {
-    if (!session) return;
-    const newChatId = await newChat(session);
-    redirect(`/chat/${newChatId}`);
-  };
-
   // const {
   //   data: chats,
   //   error,
@@ -97,7 +91,7 @@ const AppSidebar = async ({
         </SidebarGroup>
         <SidebarGroup>
           <SidebarGroupContent>
-            <NewChat create={createNewChat} />
+            <NewChat />
           </SidebarGroupContent>
         </SidebarGroup>
         <SidebarGroup>

@@ -5,16 +5,19 @@ import { type Chat, chat, message } from "@/drizzle/schema";
 import { Session } from "@/lib/auth-client";
 import { asc, eq } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
+import { revalidatePath } from "next/cache";
 
-export const newChat = async (session: Session) => {
+export const newChat = async (userId: string) => {
   const [created] = await db
     .insert(chat)
     .values({
-      userId: session?.user.id || "",
+      userId,
       title: "New Chat",
       createdAt: new Date(),
     })
     .returning({ id: chat.id });
+
+  revalidatePath("/chat");
 
   return created.id;
 };
