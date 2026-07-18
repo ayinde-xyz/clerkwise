@@ -1,4 +1,3 @@
-"use client";
 import NewChat from "@/components/chat/newchat";
 import ChatRow from "@/components/chat/chatrow";
 import {
@@ -28,12 +27,13 @@ import {
 } from "@/components/ui/collapsible";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ChevronsUpDown } from "lucide-react";
-import { newChat } from "@/actions/newchat";
+import { chatTitles, newChat } from "@/actions/newchat";
 import { archivo } from "@/app/fonts";
 import Image from "next/image";
 import Icon from "@/app/icon.svg";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
-const fetcher = (url: string) => axios.get(url).then((res) => res.data);
 const getInitials = (name?: string | null, email?: string | null) => {
   if (name) {
     const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -52,20 +52,30 @@ const getInitials = (name?: string | null, email?: string | null) => {
 
   return "U";
 };
-const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
-  const session = useSession();
+const AppSidebar = async ({
+  ...props
+}: React.ComponentProps<typeof Sidebar>) => {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
+    return null;
+  }
 
   const createNewChat = async () => {
-    if (!session.data) return;
-    const newChatId = await newChat(session.data);
+    if (!session) return;
+    const newChatId = await newChat(session);
     redirect(`/chat/${newChatId}`);
   };
 
-  const {
-    data: chats,
-    error,
-    isLoading,
-  } = useSWR<Chat[]>("/api/chat", fetcher);
+  // const {
+  //   data: chats,
+  //   error,
+  //   isLoading,
+  // } = useSWR<Chat[]>("/api/chat", fetcher);
+
+  const chats = await chatTitles(session.user.id);
 
   return (
     <Sidebar {...props} variant="floating">
@@ -102,15 +112,15 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
           <SidebarGroupLabel>Chats</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {isLoading && (
+              {/* {isLoading && (
                 <div className="animate-pulse text-center flex flex-col space-y-2 text-white">
                   <Skeleton className="h-10 w-full" />
                   <Skeleton className="h-10 w-full" />
                   <Skeleton className="h-10 w-full" />
                 </div>
-              )}
+              )} */}
               {chats?.map((chat) => (
-                <ChatRow key={chat.id} chat={chat} error={error} />
+                <ChatRow key={chat.id} chat={chat} />
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
@@ -118,7 +128,7 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
-          {session.data && (
+          {session && (
             <SidebarMenuItem className="list-none w-full">
               <Collapsible className="w-full group/collapsible">
                 <CollapsibleTrigger asChild>
@@ -128,22 +138,19 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
                     <div className="flex items-center gap-3 min-w-0">
                       <Avatar className="h-8 w-8 rounded-lg">
                         <AvatarImage
-                          src={session.data.user.image || ""}
-                          alt={session.data.user.name || "User"}
+                          src={session.user.image || ""}
+                          alt={session.user.name || "User"}
                         />
                         <AvatarFallback className="rounded-lg">
-                          {getInitials(
-                            session.data.user.name,
-                            session.data.user.email,
-                          )}
+                          {getInitials(session.user.name, session.user.email)}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col items-start min-w-0">
                         <span className="text-sm font-semibold truncate text-left">
-                          {session.data.user.name || "User"}
+                          {session.user.name || "User"}
                         </span>
                         <span className="text-xs text-muted-foreground truncate text-left">
-                          {session.data.user.email}
+                          {session.user.email}
                         </span>
                       </div>
                     </div>

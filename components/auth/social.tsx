@@ -27,6 +27,7 @@ export const Social = () => {
       toast.loading("Signing in...");
       const result = await signIn.social({
         provider,
+        callbackURL: "/chat",
       });
 
       if (result.error) {

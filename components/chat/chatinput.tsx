@@ -10,6 +10,7 @@ import {
   Activity,
   Baby,
   Heart,
+  Ambulance,
 } from "lucide-react";
 import { Field, FieldGroup, FieldSet } from "../ui/field";
 import {
@@ -18,9 +19,6 @@ import {
   InputGroupText,
   InputGroupTextarea,
 } from "../ui/input-group";
-import ModelSelection from "./modelselection";
-import useModel from "@/hooks/use-model";
-import { useRouter } from "next/navigation";
 import { ChatSchemaType } from "@/schemas";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
@@ -51,8 +49,9 @@ const CATEGORIES = [
   {
     value: "surgery",
     label: "Surgery",
-    icon: Activity,
-    description: "Operative procedures and treatments.",
+    icon: Ambulance,
+    description:
+      "Complaints concerning trauma, emergency and surgical operations",
   },
   {
     value: "obstetrics_gynecology",
