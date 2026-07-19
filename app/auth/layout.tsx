@@ -14,13 +14,7 @@ const AuthLayout = ({ children }: { children: React.ReactNode }) => {
       {/* Header */}
       <header className="w-full max-w-6xl mx-auto flex justify-between items-center py-2 px-4 z-10 dark:text-zinc-100 mb-8">
         <Link href="/" className="flex items-center gap-2">
-          <Image
-            src={logo}
-            alt="ClerkWise Logo"
-            width={28}
-            height={28}
-            className="dark:invert"
-          />
+          <Image src={logo} alt="ClerkWise Logo" width={28} height={28} />
           <span
             className={cn(
               "text-lg font-bold text-gray-800 dark:text-zinc-100",
@@ -68,7 +62,8 @@ const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                 Interactive Simulator
               </h3>
               <p className="text-sm text-gray-600 dark:text-zinc-400">
-                Practice history-taking guided by structured clinical frameworks.
+                Practice history-taking guided by structured clinical
+                frameworks.
               </p>
             </div>
 

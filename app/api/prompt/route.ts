@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
   const origin = (await headers()).get("origin");
 
   const allowedOrigins = [
-    `https://${process.env.VERCEL_URL!}`,
+    `https://${process.env.VERCEL_URL}`,
     "http://localhost:3000",
   ];
 

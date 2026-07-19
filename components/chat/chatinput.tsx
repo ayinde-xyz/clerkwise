@@ -118,7 +118,15 @@ const ChatInput = ({
                   }}
                   aria-invalid={fieldState.invalid}
                   id="block-end-input"
-                  placeholder={categoryValue === "internal_medicine" ? "Fever and Neck pain in a 38 year old man" : categoryValue === "pediatrics" ? "Yellow eyes in a 10 hour old newborn" : categoryValue === "obstetrics_gynecology" ? "vaginal bleeding at 32 weeks gestation" : "45-year-old male with acute abdominal pain"}
+                  placeholder={
+                    categoryValue === "internal_medicine"
+                      ? "Fever and Neck pain in a 38 year old man"
+                      : categoryValue === "pediatrics"
+                        ? "Yellow eyes in a 10 hour old newborn"
+                        : categoryValue === "obstetrics_gynecology"
+                          ? "vaginal bleeding at 32 weeks gestation"
+                          : "45-year-old male with acute abdominal pain"
+                  }
                 />
                 <InputGroupAddon
                   align="block-end"
@@ -280,6 +288,9 @@ const ChatInput = ({
           </Button>
         )}
       </FieldGroup>
+      <p className="text-[10px] text-center text-slate-500 dark:text-zinc-400 mt-1 mb-2 leading-tight">
+        ClerkWise is an educational tool. Please consult a qualified medical professional before making any clinical decisions or diagnosis.
+      </p>
     </form>
   );
 };
