@@ -78,8 +78,6 @@ const ChatInterface = ({
         setLoading(true);
 
         if (!skipUserMessage) {
-          toast.loading("Sending message...");
-
           userMessageId =
             typeof window !== "undefined" && window.crypto?.randomUUID
               ? window.crypto.randomUUID()
