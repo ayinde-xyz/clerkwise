@@ -14,10 +14,7 @@ export async function POST(req: NextRequest) {
   }
   const origin = (await headers()).get("origin");
 
-  const allowedOrigins = [
-    `https://${process.env.VERCEL_URL}`,
-    "http://localhost:3000",
-  ];
+  const allowedOrigins = ["http://localhost:3000"];
 
   if (!origin || !allowedOrigins.includes(origin)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
