@@ -12,16 +12,33 @@ export async function POST(req: NextRequest) {
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  // const origin = (await headers()).get("origin");
+  const origin = req.headers.get("origin");
+  const host = req.headers.get("x-forwarded-host") || req.headers.get("host");
+  const proto = req.headers.get("x-forwarded-proto") || (process.env.NODE_ENV === "development" ? "http" : "https");
+  const currentOrigin = host ? `${proto}://${host}` : req.nextUrl.origin;
 
-  // const allowedOrigins = [
-  //   `https://${process.env.VERCEL_URL}`,
-  //   "http://localhost:3000",
-  // ];
+  const allowedOrigins = [
+    currentOrigin,
+    req.nextUrl.origin,
+    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null,
+    process.env.NEXT_PUBLIC_APP_URL,
+    "http://localhost:3000",
+  ].filter(Boolean) as string[];
 
-  // if (!origin || !allowedOrigins.includes(origin)) {
-  //   return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  // }
+  if (origin) {
+    const isAllowed = allowedOrigins.some((allowed) => allowed === origin || origin.startsWith(allowed));
+    if (!isAllowed) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+  } else {
+    const referer = req.headers.get("referer");
+    if (referer) {
+      const isAllowedReferer = allowedOrigins.some((allowed) => referer.startsWith(allowed));
+      if (!isAllowedReferer) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+    }
+  }
 
   const { success, limit, remaining, reset } = await rateLimit.limit(
     session.user.id,
