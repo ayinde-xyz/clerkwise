@@ -12,13 +12,16 @@ export async function POST(req: NextRequest) {
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const origin = (await headers()).get("origin");
+  // const origin = (await headers()).get("origin");
 
-  const allowedOrigins = ["http://localhost:3000"];
+  // const allowedOrigins = [
+  //   `https://${process.env.VERCEL_URL}`,
+  //   "http://localhost:3000",
+  // ];
 
-  if (!origin || !allowedOrigins.includes(origin)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  // if (!origin || !allowedOrigins.includes(origin)) {
+  //   return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  // }
 
   const { success, limit, remaining, reset } = await rateLimit.limit(
     session.user.id,
