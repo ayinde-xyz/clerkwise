@@ -4,8 +4,35 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 
 export const metadata: Metadata = {
-  title: "Clerkwise AI",
-  description: "Built using Next.js and Langgraph and Langchain",
+  title: "Clerkwise",
+  description: "Clinical AI chatbot built for medical students.",
+  metadataBase: new URL(`https://${process.env.VERCEL_URL}`),
+  authors: { name: "Ayinde AbdurRahman" },
+  keywords: ["Wearmerce", "Store", "Next.js", "React"],
+  openGraph: {
+    title: "Clerkwise",
+    description: "Clinical AI chatbot built for medical students.",
+    siteName: "Clerkwise",
+    images: [
+      {
+        url: "https://res.cloudinary.com/dbgxwchuy/image/upload/v1784833843/Clerkwise_home_page_j7h9kl.jpg",
+        alt: "Built by Ayinde AbdurRahman",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Clerkwise",
+    description: "Clinical AI chatbot built for medical students.",
+    site: "@ayinde_xyz",
+    creator: "@ayinde_xyz",
+    images: {
+      url: "https://res.cloudinary.com/dbgxwchuy/image/upload/v1784833843/Clerkwise_home_page_j7h9kl.jpg",
+      alt: "Built by Ayinde AbdurRahman",
+    },
+  },
 };
 
 export default async function RootLayout({
@@ -20,15 +47,13 @@ export default async function RootLayout({
           attribute="class"
           defaultTheme="system"
           enableSystem
-          disableTransitionOnChange
-        >
+          disableTransitionOnChange>
           {children}
         </ThemeProvider>
       </body>
     </html>
   );
 }
-
 
 // ↑ @types/node 20.17.14 → 22.13.1
 // ↑ @types/react 19.0.7 → 19.0.8
