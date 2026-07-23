@@ -12,11 +12,6 @@ import {
   SidebarFooter,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Chat } from "@/drizzle/schema";
-import { redirect } from "next/navigation";
-import useSWR from "swr";
-import axios from "axios";
-import { Skeleton } from "../ui/skeleton";
 import ModelSelection from "./modelselection";
 import { useSession } from "@/lib/auth-client";
 import { SignOut, DeleteAccount } from "../auth/signout";
@@ -33,6 +28,7 @@ import Image from "next/image";
 import Icon from "@/app/icon.svg";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import Link from "next/link";
 
 const getInitials = (name?: string | null, email?: string | null) => {
   if (name) {
@@ -70,10 +66,12 @@ const AppSidebar = async ({
       <SidebarHeader>
         <SidebarGroup className="items-center space-x-2">
           <div className="flex items-center space-x-2">
-            <h1
-              className={`${archivo.className} text-3xl font-bold text-primary`}>
-              ClerkWise
-            </h1>
+            <Link href={"/"}>
+              <h1
+                className={`${archivo.className} text-3xl font-bold text-primary`}>
+                ClerkWise
+              </h1>
+            </Link>
             <Image
               src={Icon}
               alt="ClerkWise Logo"

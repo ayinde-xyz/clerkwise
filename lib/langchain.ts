@@ -601,33 +601,76 @@ export async function* streamLLM(
   category: ChatSchemaType["category"],
   model: ModelType,
 ): AsyncGenerator<{ content: string }> {
-  // Build the model and graph
+  // Write a space immediately to open the HTTP connection and prevent Vercel 504 gateway timeout
+  yield { content: " " };
+
   const llm = createModel(model);
   const graph = buildClerkingGraph(llm);
 
-  // Run the full graph to completion
-  const result = await graph.invoke({
-    prompt: prompt,
-    category: category as MedicalCategory,
-    context: "",
-    isValidMedical: false,
-    errorMessage: "",
-    hpc: "",
-    familyHistory: "",
-    socialHistory: "",
-    drugHistory: "",
-    pastMedicalHistory: "",
-    differentialDiagnosis: "",
-    compiledOutput: "",
-  });
+  try {
+    const stream = await graph.stream({
+      prompt: prompt,
+      category: category as MedicalCategory,
+      context: "",
+      isValidMedical: false,
+      errorMessage: "",
+      hpc: "",
+      familyHistory: "",
+      socialHistory: "",
+      drugHistory: "",
+      pastMedicalHistory: "",
+      differentialDiagnosis: "",
+      compiledOutput: "",
+    });
 
-  // Stream the compiled output in chunks for progressive display
-  if (result.compiledOutput) {
-    // Split into sections by the "---" separator for progressive streaming
-    const sections = result.compiledOutput.split("\n---\n");
-    for (const section of sections) {
-      yield { content: section.trim() + "\n\n---\n\n" };
+    for await (const event of stream) {
+      const eventAny = event as any;
+      const nodeName = Object.keys(eventAny)[0];
+      const stateUpdate = eventAny[nodeName];
+
+      if (nodeName === "validate_input" && stateUpdate) {
+        if (stateUpdate.isValidMedical) {
+          const categoryLabel = (category as string)
+            .replace(/_/g, " ")
+            .replace(/\b\w/g, (c) => c.toUpperCase());
+          yield {
+            content: `## ClerkWise Clerking Guide — ${categoryLabel}\n\n**Presenting Complaint:** ${prompt}\n\nThis guide walks you through a structured approach to clerking a patient with this presentation. Use it as a framework — adapt your questions based on the patient's responses.`,
+          };
+        }
+      }
+
+      if (nodeName === "error_handler" && stateUpdate?.compiledOutput) {
+        yield { content: stateUpdate.compiledOutput };
+      }
+
+      if (nodeName === "generate_hpc" && stateUpdate?.hpc) {
+        yield { content: `\n\n---\n\n### 📋 History of Presenting Complaint\n\n${stateUpdate.hpc}` };
+      }
+
+      if (nodeName === "generate_family_hx" && stateUpdate?.familyHistory) {
+        yield { content: `\n\n---\n\n### 👨‍👩‍👧 Family History\n\n${stateUpdate.familyHistory}` };
+      }
+
+      if (nodeName === "generate_social_hx" && stateUpdate?.socialHistory) {
+        yield { content: `\n\n---\n\n### 🏠 Social History\n\n${stateUpdate.socialHistory}` };
+      }
+
+      if (nodeName === "generate_drug_hx" && stateUpdate?.drugHistory) {
+        yield { content: `\n\n---\n\n### 💊 Drug History\n\n${stateUpdate.drugHistory}` };
+      }
+
+      if (nodeName === "generate_pmh" && stateUpdate?.pastMedicalHistory) {
+        yield { content: `\n\n---\n\n### 🏥 Past Medical History\n\n${stateUpdate.pastMedicalHistory}` };
+      }
+
+      if (nodeName === "generate_ddx" && stateUpdate?.differentialDiagnosis) {
+        yield { content: `\n\n---\n\n### 🔍 Differential Diagnosis & Investigations\n\n${stateUpdate.differentialDiagnosis}` };
+      }
     }
+  } catch (error) {
+    console.error("Error in graph streaming:", error);
+    const message = error instanceof Error ? error.message : "Unknown error";
+    yield { content: `\n\n---\n\n*An error occurred while streaming response: ${message}*` };
   }
 }
 
